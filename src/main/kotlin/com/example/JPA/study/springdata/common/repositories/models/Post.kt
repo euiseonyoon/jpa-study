@@ -6,10 +6,9 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 import org.springframework.data.domain.AbstractAggregateRoot
-import java.util.Date
+import java.time.Clock
+import java.time.LocalDateTime
 
 // NOTE: 이런식으로
 @Entity
@@ -22,8 +21,7 @@ class Post : AbstractAggregateRoot<Post>() {
 
     var content: String = ""
 
-    @Temporal(TemporalType.TIMESTAMP)
-    var created: Date = Date()
+    var created: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
 
     // 양방향, 주인은 Comment( Comment가 Post로 향하는 foreign key를 가지고 있어서)
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
