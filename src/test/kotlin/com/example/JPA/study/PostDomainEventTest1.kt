@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import
 
 @DataJpaTest
 @Import(PostListenerConfig::class)
-class PostCustomRepoTest3 {
+class PostDomainEventTest1 {
 
     @Autowired
     lateinit var postRepository: PostRepository
