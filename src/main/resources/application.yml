@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: JPA-hibernate-study
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5                # ?? ??? ??
+      maximum-pool-size: 20          # ?? ??? ?? (??? ?? ??)
+      idle-timeout: 30000            # (ms) ?? ??? ???? ?? ?? (30?)
+      max-lifetime: 1800000          # (ms) ??? ?? ?? ?? (30?)
+      connection-timeout: 5000       # (ms) ??? ???? ???? (5?)
+      auto-commit: false             # ???? ?? ??? ???
+      pool-name: HikariPool          # ?? ??? ? ??
+      validation-timeout: 3000       # (ms) ??? ?? ?? ??
+      leak-detection-threshold: 2000 # (ms) ??? ?? ?? (2? ?? ??? ??)
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        order_inserts: true
+        order_updates: true
+        jdbc:
+          batch_size: 20
+
+logging:
+  level:
+    org.hibernate.SQL: debug           # ???? SQL ??
+    org.hibernate.type.descriptor.sql: trace  # ????? ???? ? ??
