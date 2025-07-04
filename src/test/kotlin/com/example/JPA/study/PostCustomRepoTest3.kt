@@ -19,11 +19,13 @@ class PostCustomRepoTest3 {
     @Autowired
     lateinit var postRepository: PostRepository
 
+    // implementing ApplicationEventPublisher
     @Autowired
     lateinit var applicationContext: ApplicationContext
 
     @Test
     fun test1() {
+        // applicationContext = AnnotationConfigApplicationContext 객체
         val post = Post()
         post.title = "title"
         post.content = "content"

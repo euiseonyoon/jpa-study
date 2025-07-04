@@ -1,5 +1,6 @@
 package com.example.JPA.study.repositories.models
 
+import com.example.JPA.study.repositories.domainevent.PostPublishedEvent
 import jakarta.annotation.Generated
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
@@ -7,11 +8,12 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import org.springframework.data.domain.AbstractAggregateRoot
 import java.util.Date
 
-
+// NOTE: 이런식으로
 @Entity
-class Post {
+class Post : AbstractAggregateRoot<Post>() {
 
     @Id @Generated
     val id: Long = 0
@@ -30,6 +32,12 @@ class Post {
     fun addComment(comment: Comment) {
         comment.post = this
         this.comments.add(comment)
+    }
+
+    fun publish(): Post {
+        val event = PostPublishedEvent(this)
+        this.registerEvent(event)
+        return this
     }
 }
 
