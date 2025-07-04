@@ -1,4 +1,4 @@
-package com.example.JPA.study.repositories.customgeneral
+package com.example.JPA.study.springdata.common.repositories.customgeneral
 
 import jakarta.persistence.EntityManager
 import org.springframework.data.jpa.repository.support.JpaEntityInformation

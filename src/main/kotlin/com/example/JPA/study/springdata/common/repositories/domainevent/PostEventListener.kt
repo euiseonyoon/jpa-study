@@ -1,6 +1,5 @@
-package com.example.JPA.study.repositories.domainevent
+package com.example.JPA.study.springdata.common.repositories.domainevent
 
-import org.springframework.context.ApplicationListener
 import org.springframework.context.event.EventListener
 
 // NOTE: 둘다 사용 가능

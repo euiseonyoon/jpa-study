@@ -1,8 +1,8 @@
 package com.example.JPA.study
 
-import com.example.JPA.study.repositories.custom.PostRepository
-import com.example.JPA.study.repositories.domainevent.PostListenerConfig
-import com.example.JPA.study.repositories.models.Post
+import com.example.JPA.study.springdata.common.repositories.custom.PostRepository
+import com.example.JPA.study.springdata.common.repositories.domainevent.PostListenerConfig
+import com.example.JPA.study.springdata.common.repositories.models.Post
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest

@@ -1,4 +1,4 @@
-package com.example.JPA.study.repositories.customgeneral
+package com.example.JPA.study.springdata.common.repositories.customgeneral
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean

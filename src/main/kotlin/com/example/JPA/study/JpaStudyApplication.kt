@@ -1,6 +1,6 @@
 package com.example.JPA.study
 
-import com.example.JPA.study.repositories.customgeneral.MyRepositoryImpl
+import com.example.JPA.study.springdata.common.repositories.customgeneral.MyRepositoryImpl
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories

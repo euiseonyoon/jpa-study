@@ -1,6 +1,6 @@
-package com.example.JPA.study.repositories.custom
+package com.example.JPA.study.springdata.common.repositories.custom
 
-import com.example.JPA.study.repositories.models.Post
+import com.example.JPA.study.springdata.common.repositories.models.Post
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Repository

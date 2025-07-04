@@ -1,6 +1,6 @@
-package com.example.JPA.study.repositories.domainevent
+package com.example.JPA.study.springdata.common.repositories.domainevent
 
-import com.example.JPA.study.repositories.models.Post
+import com.example.JPA.study.springdata.common.repositories.models.Post
 import org.springframework.context.ApplicationEvent
 
 class PostPublishedEvent(

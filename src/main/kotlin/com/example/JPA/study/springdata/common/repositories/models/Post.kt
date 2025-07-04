@@ -1,6 +1,6 @@
-package com.example.JPA.study.repositories.models
+package com.example.JPA.study.springdata.common.repositories.models
 
-import com.example.JPA.study.repositories.domainevent.PostPublishedEvent
+import com.example.JPA.study.springdata.common.repositories.domainevent.PostPublishedEvent
 import jakarta.annotation.Generated
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity

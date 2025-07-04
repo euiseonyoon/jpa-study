@@ -1,4 +1,4 @@
-package com.example.JPA.study.repositories.domainevent
+package com.example.JPA.study.springdata.common.repositories.domainevent
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

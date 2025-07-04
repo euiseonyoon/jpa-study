@@ -1,4 +1,4 @@
-package com.example.JPA.study.repositories.models
+package com.example.JPA.study.springdata.common.repositories.models
 
 import jakarta.annotation.Generated
 import jakarta.persistence.Entity
