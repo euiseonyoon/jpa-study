@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import kotlin.test.assertTrue
 
 @DataJpaTest
 class EntityGraphTest {
@@ -26,11 +27,12 @@ class EntityGraphTest {
         }
 
         val savedProducts = (0..19).map { it ->
-            val product = if (it <= 9) {
-                Product(name = "$it product", price = it * 100, store = savedStore1)
+            val (product, store) = if (it <= 9) {
+                Product(name = "$it product", price = it * 100, store = savedStore1) to savedStore1
             } else {
-                Product(name = "$it product", price = it * 120, store = savedStore2)
+                Product(name = "$it product", price = it * 120, store = savedStore2) to savedStore2
             }
+            store.addProduct(product)
             productRepository.save(product)
         }
         em.flush()
@@ -40,7 +42,16 @@ class EntityGraphTest {
     @Test
     fun test() {
         addStoreAndProduct()
-        em.clear()
+
+        val allStores = storeRepository.findAll()
+        allStores.map { store ->
+            assertTrue { store.productList.isNotEmpty() }
+
+            store.productList.map { product ->
+                assertTrue { product.store.id == store.id }
+                assertTrue { product.store.productList.contains(product) }
+            }
+        }
 
         // 1 + N
         val foundStores = storeRepository.findAll()
