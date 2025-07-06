@@ -27,4 +27,8 @@ class Store(
 
     val productList: List<Product>
             get() = products.toList()
+
+    fun addProduct(product: Product) {
+        this.products.add(product)
+    }
 }
