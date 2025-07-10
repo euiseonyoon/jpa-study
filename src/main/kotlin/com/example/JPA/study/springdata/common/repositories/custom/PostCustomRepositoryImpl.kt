@@ -2,8 +2,8 @@ package com.example.JPA.study.springdata.common.repositories.custom
 
 import com.example.JPA.study.springdata.common.repositories.models.Post
 import jakarta.persistence.EntityManager
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 @Transactional
