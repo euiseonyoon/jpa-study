@@ -7,6 +7,7 @@ import com.example.JPA.study.springdata.mystudy.MyServiceWithTransactionalUsingO
 import com.example.JPA.study.springdata.mystudy.RockRepository
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.aop.support.AopUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -112,5 +113,41 @@ class MyServiceTest {
          *      1. 그러면 이러한 경우에 Transaction이 보장이 되는가?
          *      2. 된다면 어떠한 원리/이유로 ? (중간 @Service without @Transactional도 proxy가 되어야 transaction 이 보장되지 않을까?)
          */
+    }
+
+    @Test
+    @DisplayName("간단한 새로운 Rock을 save 하는 테스트")
+    fun test4() {
+        val savedRock = myServiceWithTransactionalUsingOtherService.saveRock("rockName1", 10)
+        // 결과 : 실제 DB에 잘 저장됨
+
+        assertThrows<Exception> {
+            myServiceWithTransactionalUsingOtherService.saveRock("rockName1", -1)
+        }
+    }
+
+    @Test
+    @DisplayName("""
+        여러 Rock을 save 한다. 하지만 의도적으로 마지막 rock을 save할때 무게를 음수처리하여 DB 오류를 발생시킨다.
+        목적: MiddleService는 proxy가 아닌데, 과연 트렌젝션 보장이 되는가? 
+    """)
+    fun test4_1() {
+        val rockInfo = mapOf<String, Int>(
+            "rockName10" to 10,
+            "rockName11" to 11,
+            "rockName12" to -1,
+        )
+        myServiceWithTransactionalUsingOtherService.saveRocks(rockInfo)
+
+        /**
+         * 결론: rock들이 하나도 저장안됨, 트렌젝션 보장
+         * 그러면 왜 중간 MiddleeService는 프록시도 아닌데 트렌젝션이 보장이 될까?
+         * 이유:
+         *      1. myServiceWithTransactionalUsingOtherService.saveRocks()는 @Transactional이라는 어노테이션이 붙어있음
+         *      2. 해당 어노테이션으로 인해. MyServiceWithTransactionalUsingOtherService의 saveRocks()라는 메소드가 실행될때,
+         *          트렌젝션 보장을 위한 advice들이 적용됨
+         *      3. 그래서 proxy가 아닌 MyMiddleService 에서 에러가 나도 advice로 전파가 되고 -> 이를 통해 롤백/커밋을 함.
+         *
+         * */
     }
 }
