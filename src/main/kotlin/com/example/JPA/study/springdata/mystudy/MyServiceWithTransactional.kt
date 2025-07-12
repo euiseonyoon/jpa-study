@@ -18,4 +18,20 @@ class MyServiceWithTransactional(
         val savedRock = rockRepository.save(newRock)
         return savedRock
     }
+
+    fun saveRocks(rockInfo: Map<String, Int>) {
+        saveRocksInnerTransactional(rockInfo)
+    }
+
+    @Transactional
+    fun saveRocksInnerTransactional(rockInfo: Map<String, Int>) {
+        val length = rockInfo.keys.size
+
+        for((index, entry) in rockInfo.entries.withIndex()) {
+            val rockName = entry.key
+            val rockWeight = entry.value
+            val newRock = Rock(name= rockName, weightKgs = rockWeight)
+            rockRepository.save(newRock)
+        }
+    }
 }
