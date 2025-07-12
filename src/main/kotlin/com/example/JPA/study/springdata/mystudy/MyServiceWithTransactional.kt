@@ -1,14 +1,15 @@
 package com.example.JPA.study.springdata.mystudy
 
 import com.example.JPA.study.logger
-import com.example.JPA.study.springdata.jpa.projection.PostWithLikeCommentsRepository
 import com.example.JPA.study.springdata.mystudy.models.Rock
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class MyServiceWithTransactional(
-    private val rockRepository: RockRepository
+    private val rockRepository: RockRepository,
+    private val middleService: MyMiddleService,
 ) {
     private val log = logger()
 
@@ -17,6 +18,27 @@ class MyServiceWithTransactional(
         val newRock = Rock(name = rockName, weightKgs = rockWeight)
         val savedRock = rockRepository.save(newRock)
         return savedRock
+    }
+
+    @Transactional
+    fun saveRocksWithRequiresNewPropagation(rockInfo: Map<String, Int>) {
+        for((key, value) in rockInfo) {
+            saveRockRequiresNew(key, value)
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun saveRockRequiresNew(rockName: String, rockWeight: Int): Rock {
+        val newRock = Rock(name = rockName, weightKgs = rockWeight)
+        val savedRock = rockRepository.save(newRock)
+        return savedRock
+    }
+
+    @Transactional
+    fun saveRocksWithRequiresNewPropagationWithMiddleService(rockInfo: Map<String, Int>) {
+        for((key, value) in rockInfo) {
+            middleService.saveRockRequiresNew(key, value)
+        }
     }
 
     @Transactional

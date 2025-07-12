@@ -3,11 +3,12 @@ package com.example.JPA.study.springdata.mystudy
 import com.example.JPA.study.logger
 import com.example.JPA.study.springdata.mystudy.models.Rock
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class MyServiceWithTransactionalUsingOtherService(
-    val myMiddleService: MyMiddleService
+    val myMiddleService: MyMiddleService,
 ) {
     private val log = logger()
 
@@ -25,6 +26,13 @@ class MyServiceWithTransactionalUsingOtherService(
             val rockName = entry.key
             val rockWeight = entry.value
             myMiddleService.saveRockInTheMiddle(rockName, rockWeight)
+        }
+    }
+
+    @Transactional
+    fun saveRocksWithRequiresNewPropagation(rockInfo: Map<String, Int>) {
+        for((key, value) in rockInfo) {
+            myMiddleService.saveRockRequiresNew(key, value)
         }
     }
 }
