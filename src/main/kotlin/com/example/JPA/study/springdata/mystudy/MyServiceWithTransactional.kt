@@ -19,12 +19,33 @@ class MyServiceWithTransactional(
         return savedRock
     }
 
+    @Transactional
+    fun saveRocksTransactional1(rockInfo: Map<String, Int>) {
+        saveRocksInnerNoTransactional(rockInfo)
+    }
+
+    @Transactional
+    fun saveRocksTransactional2(rockInfo: Map<String, Int>) {
+        saveRocksInnerTransactional(rockInfo)
+    }
+
     fun saveRocks(rockInfo: Map<String, Int>) {
         saveRocksInnerTransactional(rockInfo)
     }
 
     @Transactional
     fun saveRocksInnerTransactional(rockInfo: Map<String, Int>) {
+        val length = rockInfo.keys.size
+
+        for((index, entry) in rockInfo.entries.withIndex()) {
+            val rockName = entry.key
+            val rockWeight = entry.value
+            val newRock = Rock(name= rockName, weightKgs = rockWeight)
+            rockRepository.save(newRock)
+        }
+    }
+
+    fun saveRocksInnerNoTransactional(rockInfo: Map<String, Int>) {
         val length = rockInfo.keys.size
 
         for((index, entry) in rockInfo.entries.withIndex()) {
