@@ -1,19 +1,42 @@
 package com.example.JPA.study.springdata.mystudy
 
 import com.example.JPA.study.logger
-import com.example.JPA.study.springdata.jpa.projection.PostWithLikeCommentsRepository
 import com.example.JPA.study.springdata.mystudy.models.Rock
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class MyServiceWithTransactional(
-    private val rockRepository: RockRepository
+    private val rockRepository: RockRepository,
+    private val objectProvider: ObjectProvider<MyServiceWithTransactional>
 ) {
     private val log = logger()
 
     @Transactional
     fun saveRock(rockName: String, rockWeight: Int): Rock {
+        val newRock = Rock(name = rockName, weightKgs = rockWeight)
+        val savedRock = rockRepository.save(newRock)
+        return savedRock
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun saveRocksWithRequiresNewPropagation(rockInfo: Map<String, Int>) {
+        for((key, value) in rockInfo) {
+            saveRockRequiresNew(key, value)
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun saveRocksWithRequiresNewPropagationObjectProvider(rockInfo: Map<String, Int>) {
+        for((key, value) in rockInfo) {
+            objectProvider.`object`.saveRockRequiresNew(key, value)
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun saveRockRequiresNew(rockName: String, rockWeight: Int): Rock {
         val newRock = Rock(name = rockName, weightKgs = rockWeight)
         val savedRock = rockRepository.save(newRock)
         return savedRock
