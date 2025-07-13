@@ -2,6 +2,7 @@ package com.example.springdb.study.springtx.propagation
 
 import com.example.springdb.study.logger
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -13,6 +14,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.UnexpectedRollbackException
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute
 import javax.sql.DataSource
 
@@ -238,6 +240,59 @@ class BasicTxTest {
          * Initiating transaction rollback.
          * Rolling back JDBC transaction on Connection [HikariProxyConnection@1967943387 wrapping org.postgresql.jdbc.PgConnection@2674ca88]
          * Releasing JDBC Connection [HikariProxyConnection@1967943387 wrapping org.postgresql.jdbc.PgConnection@2674ca88] after transaction
+         *
+         * */
+    }
+
+    @Test
+    fun inner_rollback() {
+        log.info("외부 tx 시작")
+        val outer = txManager.getTransaction(DefaultTransactionAttribute())
+
+        log.info("내부 tx 시작")
+        val inner = txManager.getTransaction(DefaultTransactionAttribute())
+        log.info("내부 tx 롤백")
+        txManager.rollback(inner)
+
+        log.info("외부 tx 커밋")
+        assertThrows<UnexpectedRollbackException> {
+            txManager.commit(outer)
+        }
+
+        /**
+         * 설명:
+         *      1. outer가 물리 트렌젝션을 시작한다.
+         *      2. 내부 트렌젝션은 기존 트렌젝션이 참여한다.
+         *      3. 내부 트렌젝션에서 롤백하면 실제 물리 트렌젝션은 롤백하지 않는다.
+         *      4. 대신, 내부 트렌젝션에서는 기존 트렌젝션을 롤백 전용이라고 마킹한다.
+         *      5. 그래서 외부 트렌젝션에서 기존 물리 트렌젝션을 커밋하려고 한다
+         *      6. 이때 "이건 롤백 전용" 마크로 인해 물리 트렌젝션이 롤백된다. (외부, 내부 트렌젝션 모두 롤백된다.)
+         *      7. UnexpectedRollbackException를 발생시켜 에러를 전파한다.
+         *
+         * 에러 발생:
+         *      org.springframework.transaction.UnexpectedRollbackException: Transaction rolled back because it has been marked as rollback-only
+         *
+         * 아래 로그에서:
+         *      내부 tx 롤백
+         *      Participating transaction failed - marking existing transaction as rollback-only
+         *
+         * LOG:
+         *
+         * 외부 tx 시작
+         * Creating new transaction with name [null]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+         * Acquired Connection [HikariProxyConnection@861440872 wrapping org.postgresql.jdbc.PgConnection@a97a895] for JDBC transaction
+         *
+         * 내부 tx 시작
+         * Participating in existing transaction
+         * 내부 tx 롤백
+         * Participating transaction failed - marking existing transaction as rollback-only.
+         * Setting JDBC transaction [HikariProxyConnection@861440872 wrapping org.postgresql.jdbc.PgConnection@a97a895] rollback-only
+         *
+         * 외부 tx 커밋
+         * Global transaction is marked as rollback-only but transactional code requested commit
+         * Initiating transaction rollback
+         * Rolling back JDBC transaction on Connection [HikariProxyConnection@861440872 wrapping org.postgresql.jdbc.PgConnection@a97a895]
+         * Releasing JDBC Connection [HikariProxyConnection@861440872 wrapping org.postgresql.jdbc.PgConnection@a97a895] after transaction
          *
          * */
     }
