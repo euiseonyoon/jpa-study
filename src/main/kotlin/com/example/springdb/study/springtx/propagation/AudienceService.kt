@@ -2,6 +2,7 @@ package com.example.springdb.study.springtx.propagation
 
 import com.example.springdb.study.logger
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AudienceService(
@@ -10,7 +11,7 @@ class AudienceService(
 ) {
     private val log = logger()
 
-    // 각각 다른 transaction을 알아보는 예제
+    @Transactional
     fun joinV1(username: String) {
         val audience = Audience(username)
         val logMessage = Log(username)
@@ -24,7 +25,6 @@ class AudienceService(
         log.info("=== logRepository 호출 시작 ===")
     }
 
-    // 각각 다른 transaction을 알아보는 예제
     fun joinV2(username: String) {
         val audience = Audience(username)
         val logMessage = Log(username)

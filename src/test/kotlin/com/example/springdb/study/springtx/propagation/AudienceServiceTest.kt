@@ -58,4 +58,22 @@ class AudienceServiceTest {
         assertTrue { logRepository.find(username).isEmpty }
     }
 
+    /**
+     * audienceService       @Transactional: ON
+     * audienceRepository    @Transactional: ON
+     * logRepository         @Transactional: ON
+     * */
+    @Test
+    fun outerTxOn_success() {
+        // GIVEN
+        val username = "outerTxOn_success"
+
+        // WHEN
+        audienceService.joinV1(username)
+
+        // THEN: 모든 데이터가 정상 저장된다.
+        assertTrue { audienceRepository.find(username).isPresent }
+        assertTrue { logRepository.find(username).isPresent }
+    }
+
 }
