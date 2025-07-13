@@ -76,4 +76,24 @@ class AudienceServiceTest {
         assertTrue { logRepository.find(username).isPresent }
     }
 
+    /**
+     * audienceService       @Transactional: ON
+     * audienceRepository    @Transactional: ON
+     * logRepository         @Transactional: ON.  Exception 여기서 발생
+     * */
+    @Test
+    fun outerTxOn_fail() {
+        // GIVEN
+        val username = "로그예외_outerTxOn_fail"
+
+        // WHEN
+        assertThrows<RuntimeException>{
+            audienceService.joinV1(username)
+        }
+
+        // THEN
+        assertTrue { audienceRepository.find(username).isEmpty }
+        assertTrue { logRepository.find(username).isEmpty }
+    }
+
 }
