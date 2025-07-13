@@ -155,4 +155,55 @@ class BasicTxTest {
          *
          * */
     }
+
+    @Test
+    fun inner_commit() {
+        log.info("외부 tx 시작")
+        val outer = txManager.getTransaction(DefaultTransactionAttribute())
+        log.info("outer.isNewTransaction={}", outer.isNewTransaction)
+
+        log.info("내부 tx 시작")
+        val inner = txManager.getTransaction(DefaultTransactionAttribute())
+        log.info("inner.isNewTransaction={}",inner.isNewTransaction)
+        log.info("내부 tx 커밋")
+        txManager.commit(inner)
+
+        log.info("외부 tx 커밋")
+        txManager.commit(outer)
+
+        /**
+         * JpaTransactionManager은 AbstractPlatformTransactionManager를 상속
+         * AbstractPlatformTransactionManager는 내부적으로 TransactionSynchronizationManager을 사용한다
+         * TransactionSynchronizationManager는 트랜잭션의 리소스와 동기화 정보를 현재 스레드의 ThreadLocal에 저장하여 관리한다.
+         * 따라서 트랜잭션의 동기화 정보는 결국 ThreadLocal을 통해 스레드별로 관리된다.
+         *
+         * LOG:
+         *      아래의 로그를 보면 외부,내부 논리적 트렌젝션들이 하나의 물리 트렌젝션으로 묶임을 알 수 있다.
+         *      그래서 최후에 물리 트렌젝션 commit이 한번만 이루어졌다.
+         *
+         *      HikariProxyConnection@754468537
+         *
+         *      1. outer가 transaction 생성 : outer.isNewTransaction=true
+         *      2. inner에서 그 transaction을 그대로 사용:
+         *          Participating in existing transaction
+         *          inner.isNewTransaction=false
+         *
+         *
+         * 외부 tx 시작
+         * Creating new transaction with name [null]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+         * Acquired Connection [HikariProxyConnection@754468537 wrapping org.postgresql.jdbc.PgConnection@68229a6] for JDBC transaction
+         * outer.isNewTransaction=true
+         *
+         * 내부 tx 시작
+         * Participating in existing transaction
+         * inner.isNewTransaction=false
+         * 내부 tx 커밋
+         *
+         * 외부 tx 커밋
+         * Initiating transaction commit
+         * Committing JDBC transaction on Connection [HikariProxyConnection@754468537 wrapping org.postgresql.jdbc.PgConnection@68229a6]
+         * Releasing JDBC Connection [HikariProxyConnection@754468537 wrapping org.postgresql.jdbc.PgConnection@68229a6] after transaction
+         *
+         * */
+    }
 }
