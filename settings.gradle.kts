@@ -1,1 +1,1 @@
-rootProject.name = "JPA-study"
+rootProject.name = "springdb-study"
