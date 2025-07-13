@@ -206,4 +206,39 @@ class BasicTxTest {
          *
          * */
     }
+
+    @Test
+    fun outer_rollback() {
+        log.info("외부 tx 시작")
+        val outer = txManager.getTransaction(DefaultTransactionAttribute())
+
+        log.info("내부 tx 시작")
+        val inner = txManager.getTransaction(DefaultTransactionAttribute())
+        log.info("내부 tx 커밋")
+        txManager.commit(inner)
+
+        log.info("외부 tx 롤백")
+        txManager.rollback(outer)
+
+        /**
+         * 결과: inner, outer 둘 다 롤백됨
+         *      Initiating transaction rollback.
+         *
+         * LOG:
+         *
+         * 외부 tx 시작
+         * Creating new transaction with name [null]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+         * Acquired Connection [HikariProxyConnection@1967943387 wrapping org.postgresql.jdbc.PgConnection@2674ca88] for JDBC transaction
+         *
+         * 내부 tx 시작
+         * Participating in existing transaction
+         * 내부 tx 커밋
+         *
+         * 외부 tx 롤백
+         * Initiating transaction rollback.
+         * Rolling back JDBC transaction on Connection [HikariProxyConnection@1967943387 wrapping org.postgresql.jdbc.PgConnection@2674ca88]
+         * Releasing JDBC Connection [HikariProxyConnection@1967943387 wrapping org.postgresql.jdbc.PgConnection@2674ca88] after transaction
+         *
+         * */
+    }
 }
