@@ -12,4 +12,10 @@ class MyTransactionManagerConfig {
 
     @Bean(name= ["myTransactionManager"])
     fun myTransactionManager(): PlatformTransactionManager = MyTransactionManager()
+
+    @Bean
+    @Primary
+    fun transactionManager(emf: EntityManagerFactory): PlatformTransactionManager {
+        return JpaTransactionManager(emf)
+    }
 }
