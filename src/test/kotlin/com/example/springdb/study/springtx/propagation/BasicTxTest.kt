@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.UnexpectedRollbackException
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute
@@ -293,6 +294,67 @@ class BasicTxTest {
          * Initiating transaction rollback
          * Rolling back JDBC transaction on Connection [HikariProxyConnection@861440872 wrapping org.postgresql.jdbc.PgConnection@a97a895]
          * Releasing JDBC Connection [HikariProxyConnection@861440872 wrapping org.postgresql.jdbc.PgConnection@a97a895] after transaction
+         *
+         * */
+    }
+
+    @Test
+    fun inner_rollback_requires_new() {
+        log.info("외부 tx 시작")
+        val outer = txManager.getTransaction(DefaultTransactionAttribute())
+        log.info("outer.isNewTransaction={}", outer.isNewTransaction)
+
+        log.info("내부 tx 시작")
+        val innerDefinition = DefaultTransactionAttribute()
+        // 기존 트렌젝션이 있으면, 기존 트렌젝션은 SUSPEND하고 새로운 트렌젝션을 만든다. (트렌젝션 분리)
+        innerDefinition.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
+        val inner = txManager.getTransaction(innerDefinition)
+        log.info("inner.isNewTransaction={}", inner.isNewTransaction)
+
+        log.info("내부 tx 롤백")
+        txManager.rollback(inner)
+
+        log.info("외부 tx 커밋")
+        txManager.commit(outer)
+
+        /**
+         *
+         * 아래 로그에서:
+         *      외부 트렌젝션은: HikariProxyConnection@1047220049
+         *      내부 트렌젝션은: HikariProxyConnection@1047220049  -> 서로 다른 물리 트렌젝션을 가짐을 확인 할 수 있다.
+         *
+         *      내부 트렌젝션 시작 후
+         *          Suspending current transaction, creating new transaction with name [null]  <- 기존 트렌젝션 중지
+         *          Acquired Connection  <- 새로운 물리 트렌젝션(inner) 획득
+         *      내부 트렌젝션 롤백 후
+         *          Releasing JDBC Connection [HikariProxyConnection@1047220049  <-- 위에서 얻은 inner 트렌젝션 릴리즈
+         *          Resuming suspended transaction after completion of inner transaction  <-- outer 트렌젝션으로 복귀
+         *
+         * 주의점:
+         *      이처럼 REQUIRES_NEW를 사용하게 되면 여러개의 물리 트렌젝션이 사용되고, 이로인해 여러 물리 커넥션이 사용되게 된다.
+         *      커넥션풀의 개수가 제한적인 경우, 여러 물리 커넥션을 사용하게 되면, 물리 커넥션 풀에서 커넥션의 개수가 부족한 사태가 발생 할 수 있다.
+         *
+         * LOG:
+         *
+         * 외부 tx 시작
+         * Creating new transaction with name [null]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+         * Acquired Connection [HikariProxyConnection@1452044766 wrapping org.postgresql.jdbc.PgConnection@20e48e63] for JDBC transaction
+         * outer.isNewTransaction=true  <--- 새 물리 트렌젝션 획득
+         *
+         * 내부 tx 시작
+         * Suspending current transaction, creating new transaction with name [null]
+         * Acquired Connection [HikariProxyConnection@1047220049 wrapping org.postgresql.jdbc.PgConnection@3f51fcf5] for JDBC transaction
+         * inner.isNewTransaction=true  <--- 새 물리 트렌젝션 획득
+         * 내부 tx 롤백
+         * Initiating transaction rollback  <--- inner 물리 트렌젝션 롤백
+         * Rolling back JDBC transaction on Connection [HikariProxyConnection@1047220049 wrapping org.postgresql.jdbc.PgConnection@3f51fcf5]
+         * Releasing JDBC Connection [HikariProxyConnection@1047220049 wrapping org.postgresql.jdbc.PgConnection@3f51fcf5] after transaction
+         *
+         * Resuming suspended transaction after completion of inner transaction
+         * 외부 tx 커밋
+         * Initiating transaction commit    <---- outer 물리 트렌젝션 커밋
+         * Committing JDBC transaction on Connection [HikariProxyConnection@1452044766 wrapping org.postgresql.jdbc.PgConnection@20e48e63]
+         * Releasing JDBC Connection [HikariProxyConnection@1452044766 wrapping org.postgresql.jdbc.PgConnection@20e48e63] after transaction
          *
          * */
     }
