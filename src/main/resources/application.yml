@@ -34,6 +34,21 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
-    org.hibernate.orm.jdbc.extract: trace
+    org:
+      hibernate:
+        SQL: DEBUG
+        orm:
+          jdbc:
+            bind: TRACE
+            extract: TRACE
+        resource:
+          transaction: DEBUG
+    org.springframework:
+      transaction:
+        interceptor: TRACE
+      jdbc:
+        datasource:
+          DataSourceTransactionManager: DEBUG
+      orm:
+        jpa:
+          JpaTransactionManager: DEBUG
