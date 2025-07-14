@@ -13,12 +13,12 @@ class WorkerRole(
     val workerRoleId: WorkerRoleId,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("workerId")
+    @MapsId("workerId") // WorkerRoleId.workerId 필드와 이름이 동일해야함
     @JoinColumn(name = "worker_id") // 양방향 관계의 주인
     val worker: Worker,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("roleId")
+    @MapsId("roleId") // WorkerRoleId.roleId 필드와 이름이 동일해야함
     @JoinColumn(name = "role_id") // 양방향 관계의 주인
     val role: Role
 ) {

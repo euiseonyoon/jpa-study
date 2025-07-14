@@ -3,14 +3,30 @@ package com.example.springdb.study.orm.relation.onetomany.jointable
 import jakarta.persistence.Embeddable
 import java.io.Serializable
 
-// data class로 만드는 이유는
-// equals(), hashCode() 자동으로 작성해줌
-// JPA에서 복합키(Composite Key)를 식별자로 사용하려면,
-// equals()와 hashCode()가 정확하게 구현되어 있어야 함.
-// Composite type
-// 복합키에서는 String, long 같은것만 넣는다.
 @Embeddable
-data class MembershipId(
-    var teamId: Long,
-    var memberId: Long
-) : Serializable
+class MembershipId : Serializable {
+    private var teamId: Long? = null
+    private var memberId: Long? = null
+
+    constructor()
+
+    constructor(teamId: Long, memberId: Long) {
+        this.teamId = teamId
+        this.memberId = memberId
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        other as MembershipId
+
+        return teamId == other.teamId && memberId == other.memberId
+    }
+
+    override fun hashCode(): Int {
+        var result = teamId?.hashCode() ?: 0
+        result = 31 * result + (memberId?.hashCode() ?: 0)
+        return result
+    }
+}

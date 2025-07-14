@@ -28,12 +28,12 @@ class Membership(
     val joined: LocalDateTime = LocalDateTime.now(Clock.systemUTC()),
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("teamId")
+    @MapsId("teamId") // MembershipId.teamId 필드와 이름 동일
     @JoinColumn(name = "team_id")
     val team: Team,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("memberId")
+    @MapsId("memberId") // MembershipId.memberId 필드와 이름 동일
     @JoinColumn(name = "member_id")
     var member: Member
 ) {
