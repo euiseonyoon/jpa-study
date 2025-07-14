@@ -25,6 +25,7 @@ class AudienceService(
         log.info("=== logRepository 호출 시작 ===")
     }
 
+    @Transactional
     fun joinV2(username: String) {
         val audience = Audience(username)
         val logMessage = Log(username)
