@@ -4,6 +4,7 @@ import com.example.springdb.study.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.Optional
 
@@ -14,7 +15,7 @@ class LogRepository(
 ) {
     private val log = logger()
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun save(logMessage: Log) {
         log.info("log 저장")
         em.persist(logMessage)

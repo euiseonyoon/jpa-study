@@ -138,4 +138,22 @@ class AudienceServiceTest {
         assertTrue { logRepository.find(username).isEmpty }
     }
 
+    /**
+    * audienceService       @Transactional: ON
+    * audienceRepository    @Transactional: ON
+    * logRepository         @Transactional: ON (propagation=REQUIRES_NEW). Exception 여기서 발생
+    * */
+    @Test
+    fun recoverException_success_requires_new() {
+        // GIVEN
+        val username = "로그예외_recoverException_success_requires_new"
+
+        // WHEN
+        audienceService.joinV2(username)
+
+        // THEN
+        assertTrue { audienceRepository.find(username).isPresent }
+        assertTrue { logRepository.find(username).isEmpty }
+    }
+
 }
