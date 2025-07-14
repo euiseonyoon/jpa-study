@@ -7,11 +7,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 
 @Entity
-class Book(
+class Book {
     @Id @GeneratedValue
-    val id: Long = 0,
-    val title: String = "",
-) {
+    val id: Long? = null
+    var title: String? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
     var bookStore: BookStore? = null
         set(value) {

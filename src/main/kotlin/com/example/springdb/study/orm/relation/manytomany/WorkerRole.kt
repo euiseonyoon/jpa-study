@@ -8,41 +8,41 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.MapsId
 
 @Entity
-class WorkerRole(
+class WorkerRole{
     @EmbeddedId
-    val workerRoleId: WorkerRoleId,
+    var workerRoleId: WorkerRoleId = WorkerRoleId()
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("workerId") // WorkerRoleId.workerId 필드와 이름이 동일해야함
     @JoinColumn(name = "worker_id") // 양방향 관계의 주인
-    val worker: Worker,
+    var worker: Worker? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("roleId") // WorkerRoleId.roleId 필드와 이름이 동일해야함
     @JoinColumn(name = "role_id") // 양방향 관계의 주인
-    val role: Role
-) {
+    var role: Role? = null
+
+    constructor(worker: Worker, role: Role) {
+        requireNotNull(worker.id) { "Worker must have an ID (persisted entity)" }
+        requireNotNull(role.id) { "Role must have an ID (persisted entity)" }
+
+        this.workerRoleId = WorkerRoleId(worker.id!!, role.id!!)
+        if(this.worker != worker) {
+            this.worker = worker
+        }
+        if(this.role != role) {
+            this.role = role
+        }
+
+        // 양방향 관계 설정
+        worker.addWorkerRole(this)
+        role.addWorkerRole(this)
+    }
+
     companion object {
         fun addWorker(worker: Worker, roles: List<Role>): List<WorkerRole> {
-            requireNotNull(worker.id) { "Worker must be persisted (have an id)" }
-
             return roles.map { role ->
-                requireNotNull(role.id) { "Role must be persisted (have an id)" }
-
-                val workerRole = WorkerRole(
-                    workerRoleId = WorkerRoleId(
-                        workerId = worker.id!!,
-                        roleId = role.id!!
-                    ),
-                    worker = worker,
-                    role = role
-                )
-
-                // 내부 컬렉션에 직접 추가
-                worker.addWorkerRole(workerRole)
-                role.addWorkerRole(workerRole)
-
-                workerRole
+                WorkerRole(worker, role)
             }
         }
     }

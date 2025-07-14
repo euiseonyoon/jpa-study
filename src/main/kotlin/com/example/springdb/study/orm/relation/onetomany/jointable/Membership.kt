@@ -20,50 +20,20 @@ import java.time.LocalDateTime
     // 한 사람은 1팀에만 속할 수 있음
     uniqueConstraints = [UniqueConstraint(columnNames = ["member_id"])]
 )
-class Membership(
+class Membership {
     // Composite pk
     @EmbeddedId
-    var membershipId: MembershipId? = null,
+    var membershipId: MembershipId? = null
 
-    val joined: LocalDateTime = LocalDateTime.now(Clock.systemUTC()),
+    var joined: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("teamId") // MembershipId.teamId 필드와 이름 동일
     @JoinColumn(name = "team_id")
-    val team: Team,
+    var team: Team? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("memberId") // MembershipId.memberId 필드와 이름 동일
     @JoinColumn(name = "member_id")
-    var member: Member
-) {
-    companion object {
-        fun addMembership(member: Member, team: Team): Membership  {
-            if (member.id == 0L || team.id == 0L) {
-                throw IllegalStateException("member 또는 team이 아직 영속화되지 않았습니다. 먼저 저장(save)하세요.")
-            }
-
-            val membership = Membership(
-                membershipId = MembershipId(
-                    teamId = team.id,
-                    memberId = member.id
-                ),
-                team = team,
-                member = member
-            )
-            member.memberships.add(membership)
-            team.memberships.add(membership)
-            return membership
-        }
-    }
-
-    @PrePersist
-    fun prePersist() {
-        if (membershipId == null) {
-            this.membershipId = MembershipId(
-                teamId = team.id,
-                memberId = member.id
-            )
-        }
-    }
+    var member: Member? = null
 }

@@ -13,11 +13,11 @@ import jakarta.persistence.OneToMany
 
 // Composite type
 @Entity
-class Member(
+class Member {
     @Id @GeneratedValue
-    val id: Long = 0,
+    val id: Long = 0
 
-    val name: String,
+    var name: String? = null
 
     @Embedded
     @AttributeOverrides(
@@ -34,7 +34,7 @@ class Member(
             column = Column(name = "home_zipcode")
         )
     )
-    val homeAddress: Address,
+    var homeAddress: Address? = null
 
     @Embedded
     @AttributeOverrides(
@@ -51,9 +51,8 @@ class Member(
             column = Column(name = "office_zipcode")
         )
     )
-    val officeAddress: Address,
+    var officeAddress: Address? = null
 
-) {
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val memberships: MutableSet<Membership> = mutableSetOf()
 }

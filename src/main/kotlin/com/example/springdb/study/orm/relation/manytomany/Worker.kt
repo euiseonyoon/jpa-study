@@ -8,19 +8,22 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Transient
 
 @Entity
-class Worker(
+class Worker{
     @Id @GeneratedValue
-    val id: Long? = null,
+    val id: Long? = null
+    var name: String? = null
 
-    val name: String
-) {
+    constructor()
+    constructor(name: String) {
+        this.name = name
+    }
+
     @OneToMany(mappedBy = "worker", cascade = [CascadeType.ALL], orphanRemoval = true)
     private val workerRoleMap: MutableSet<WorkerRole> = mutableSetOf()
 
     // 반드시 @Transient해줘야 함. 안그러면 JPA가 해당 컬렉션을 매핑 대상으로 생각합.
-    @get:Transient
-    val roles: List<Role>
-        get() = workerRoleMap.map { it.role }
+    @Transient
+    val roles: List<Role> = workerRoleMap.map { it.role!! }
 
     fun addWorkerRole(workerRole: WorkerRole) {
         this.workerRoleMap.add(workerRole)

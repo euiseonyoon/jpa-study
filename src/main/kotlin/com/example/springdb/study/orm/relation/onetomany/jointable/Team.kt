@@ -7,12 +7,12 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 
 @Entity
-class Team(
+class Team {
     @Id @GeneratedValue
-    val id: Long = 0,
+    val id: Long? = null
 
-    var name: String = ""
-) {
+    var name: String? = null
+
     // 팀이 없으면 join table(Membership)에서 member도 없어져야함
     @OneToMany(mappedBy = "team", cascade = [CascadeType.ALL], orphanRemoval = true)
     val memberships: MutableSet<Membership> = mutableSetOf()

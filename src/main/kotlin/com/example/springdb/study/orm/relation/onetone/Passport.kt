@@ -6,11 +6,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToOne
 
 @Entity
-class Passport(
+class Passport {
     @Id @GeneratedValue
-    val id: Long = 0,
-    val number: String
-) {
+    val id: Long? = null
+    var number: String? = null
+
     @OneToOne(mappedBy = "passport")
     var owner: Person? = null
 }

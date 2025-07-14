@@ -6,11 +6,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 
 @Entity
-class BookStore(
+class BookStore {
     @Id @GeneratedValue
-    val id: Long = 0,
-    val name: String = "",
-) {
+    val id: Long? = null
+    var name: String? = null
+
     // 양방향
     @OneToMany(mappedBy = "bookStore")
     val books: MutableSet<Book> = mutableSetOf()

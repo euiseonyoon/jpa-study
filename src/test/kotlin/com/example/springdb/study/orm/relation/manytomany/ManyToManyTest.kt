@@ -1,8 +1,5 @@
 package com.example.springdb.study.orm.relation.manytomany
 
-import com.example.springdb.study.orm.relation.manytomany.Role
-import com.example.springdb.study.orm.relation.manytomany.Worker
-import com.example.springdb.study.orm.relation.manytomany.WorkerRole
 import jakarta.persistence.EntityManager
 import org.hibernate.Session
 import org.junit.jupiter.api.Test
