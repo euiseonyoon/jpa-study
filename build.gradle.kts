@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	// web
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
