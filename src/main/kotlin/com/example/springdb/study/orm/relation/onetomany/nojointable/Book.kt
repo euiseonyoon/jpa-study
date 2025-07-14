@@ -14,4 +14,8 @@ class Book(
 ) {
     @ManyToOne(fetch = FetchType.LAZY)
     var bookStore: BookStore? = null
+        set(value) {
+            field = value
+            value?.addBook(this)  // ②
+        }
 }

@@ -16,7 +16,11 @@ class BookStore(
     val books: MutableSet<Book> = mutableSetOf()
 
     fun addBook(book: Book) {
-        book.bookStore = this
         this.books.add(book)
+        // 만약 Book의 bookStore setter 처럼 되어있다면, 무한 루프가 발생할수 있다.
+        // 이를 방지하기 위한 코드
+        if(book.bookStore != this) {
+            book.bookStore = this
+        }
     }
 }

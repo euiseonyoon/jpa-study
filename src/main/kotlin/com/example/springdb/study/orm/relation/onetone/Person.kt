@@ -24,6 +24,8 @@ class Person(
 
     fun renewPassport(passport: Passport) {
         this.passport = passport
-        passport.owner = this
+        if(passport.owner != this) {
+            passport.owner = this
+        }
     }
 }
