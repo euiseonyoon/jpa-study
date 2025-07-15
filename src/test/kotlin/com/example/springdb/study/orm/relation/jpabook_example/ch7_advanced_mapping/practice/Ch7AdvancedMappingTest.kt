@@ -79,6 +79,14 @@ class Ch7AdvancedMappingTest {
         return order
     }
 
+    private fun createDelivery(member: Ch7Member, order: Ch7Order) {
+        val delivery = Ch7Delivery()
+        // 멤버의 주소가 변한다면 이것도 변해야 하기 떄문에 copy하지 않고 그대로 넣는다.
+        delivery.address = member.address
+        delivery.status = Ch7DeliveryStatus.STARTED
+        order.assignDelivery(delivery)
+    }
+
     @Transactional
     @Test
     fun test() {
@@ -103,6 +111,7 @@ class Ch7AdvancedMappingTest {
         em.persist(book)
 
         val musicOrder = createOrder(member, music, 2)
+        createDelivery(member, musicOrder)
         em.persist(musicOrder)
 
         em.flush()
@@ -205,15 +214,19 @@ class Ch7AdvancedMappingTest {
          *     where
          *         oi1_0.order_id=?
          * */
-        val firstOrder = madeMusicOrder.orderItems.first()
+        val firstOrderItem = madeMusicOrder.orderItems.first()
         log.info("--------------------------------------------------")
         // 아래는 아무런 쿼리 발생하지 않음.
-        val orderedItem = firstOrder.item
+        val orderedItem = firstOrderItem.item
 
         log.info("--------------------------------------------------")
         // 아래 두줄에서 쿼리 발생하지 않았다.
         val orderedAlbum = orderedItem as Ch7Album
         val artistName = orderedAlbum.artist
+
+        log.info("--------------------------------------------------")
+        // 아래에서 쿼리 발생하지 않았다.
+        val madeDelivery = firstOrderItem.order?.delivery
     }
 
 }

@@ -22,7 +22,7 @@ class Ch7Order : RegisterUpdateBaseEntity() {
     @JoinColumn(name = "member_id", nullable = false)
     var member: Ch7Member? = null
 
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "delivery_id")
     var delivery: Ch7Delivery? = null
 

@@ -1,5 +1,6 @@
 package com.example.springdb.study.orm.relation.jpabook_example.ch7_advanced_mapping.practice
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
@@ -16,7 +17,7 @@ class Ch7Category : RegisterUpdateBaseEntity(){
 
     var name: String? = null
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "parent_id")
     var parent: Ch7Category? = null
 

@@ -20,7 +20,7 @@ class Ch7Delivery : RegisterUpdateBaseEntity() {
     @Embedded
     var address: Ch7Address? = null
 
-    @OneToOne(mappedBy = "delivery", cascade = [CascadeType.ALL])
+    @OneToOne(mappedBy = "delivery")
     var order: Ch7Order? = null
 }
 
