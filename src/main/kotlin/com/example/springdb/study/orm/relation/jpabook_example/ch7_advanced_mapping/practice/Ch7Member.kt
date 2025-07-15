@@ -9,7 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 
 @Entity
-class Ch7Member : RegisterUpdateBaseEntity() {
+class Ch7Member : RegisterUpdateBaseEntity {
     @Id @GeneratedValue
     val id: Long? = null
 
@@ -22,5 +22,11 @@ class Ch7Member : RegisterUpdateBaseEntity() {
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     var orders: MutableSet<Ch7Order> = mutableSetOf()
+
+    constructor() : super()
+    constructor(name: String, address: Ch7Address) {
+        this.name = name
+        this.address = address
+    }
 }
 

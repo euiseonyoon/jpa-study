@@ -35,10 +35,32 @@ class Ch7Order : RegisterUpdateBaseEntity() {
     @OneToMany(mappedBy = "order")
     var orderItems: MutableSet<Ch7OrderItem> = mutableSetOf()
 
+    fun assignMember(member: Ch7Member) {
+        this.member = member
+        if ( !member.orders.contains(this) ){
+            member.orders.add(this)
+        }
+    }
+
     fun assignDelivery(delivery: Ch7Delivery) {
         this.delivery = delivery
         if (delivery.order != this) {
             delivery.order = this
+        }
+    }
+
+    fun assignItem(item: Ch7Item, count: Int) {
+        val orderItem = Ch7OrderItem()
+        orderItem.order = this
+        orderItem.item = item
+        orderItem.price = item.price
+        orderItem.count = count
+
+        if (!this.orderItems.contains(orderItem)) {
+            this.orderItems.add(orderItem)
+        }
+        if (!item.orderItems.contains(orderItem)) {
+            item.orderItems.add(orderItem)
         }
     }
 }

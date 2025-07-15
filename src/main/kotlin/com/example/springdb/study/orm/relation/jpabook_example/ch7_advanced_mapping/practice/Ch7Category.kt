@@ -29,5 +29,19 @@ class Ch7Category : RegisterUpdateBaseEntity(){
         inverseJoinColumns = [JoinColumn(name= "item_id", nullable = false)]
     )
     var items: MutableSet<Ch7Item> = mutableSetOf()
+
+    fun addItem(item: Ch7Item) {
+        this.items.add(item)
+        if (!item.categories.contains(this)) {
+            item.categories.add(this)
+        }
+    }
+
+    fun addChild(child: Ch7Category) {
+        this.child.add(child)
+        if (child.parent != this) {
+            child.parent = this
+        }
+    }
 }
 
