@@ -1,15 +1,20 @@
 package com.example.springdb.study.orm.relation.jpabook_example.ch7_advanced_mapping.practice
 
 import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
+import jakarta.persistence.Inheritance
+import jakarta.persistence.InheritanceType
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 
 @Entity
-class Ch7Item {
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "DTYPE")
+abstract class Ch7Item : RegisterUpdateBaseEntity() {
     @Id @GeneratedValue
     val id: Long? = null
 
@@ -28,4 +33,3 @@ class Ch7Item {
     @ManyToMany(mappedBy = "items") // 그냥 양방향 커넥션의 주인을 카테고리로 정했다.
     var categories: MutableSet<Ch7Category> = mutableSetOf()
 }
-

@@ -9,7 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToOne
 
 @Entity
-class Ch7Delivery {
+class Ch7Delivery : RegisterUpdateBaseEntity() {
     @Id @GeneratedValue
     val id: Long? = null
 

@@ -13,7 +13,7 @@ import jakarta.persistence.OneToOne
 import java.time.LocalDateTime
 
 @Entity
-class Ch7Order {
+class Ch7Order : RegisterUpdateBaseEntity() {
     @Id @GeneratedValue
     val id: Long? = null
 

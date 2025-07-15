@@ -15,7 +15,7 @@ import jakarta.persistence.UniqueConstraint
         UniqueConstraint(columnNames = ["order", "item"])
     ]
 )
-class Ch7OrderItem {
+class Ch7OrderItem : RegisterUpdateBaseEntity() {
     @Id @GeneratedValue
     val id: Long? = null
 

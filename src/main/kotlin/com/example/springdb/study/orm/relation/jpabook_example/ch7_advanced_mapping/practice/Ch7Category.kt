@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 
 @Entity
-class Ch7Category {
+class Ch7Category : RegisterUpdateBaseEntity(){
     @Id @GeneratedValue
     val id: Long? = null
 
