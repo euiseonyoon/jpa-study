@@ -1,9 +1,12 @@
 package com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 
 @Entity
 class Ch10Item {
@@ -15,6 +18,9 @@ class Ch10Item {
 
     var price: Int = 0
     var stockQuantity: Int = 0
+
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    var orderItems: MutableSet<Ch10OrderItem> = mutableSetOf()
 
     constructor()
     constructor(name: String, price: Int, stockQuantity: Int) {

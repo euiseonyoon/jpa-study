@@ -3,16 +3,26 @@ package com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_l
 import com.example.springdb.study.logger
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10Item
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10Member
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10Order
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10OrderItem
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Item
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Member
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Order
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10OrderItem
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10ItemRepository
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10MemberRepository
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderItemRepository
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderRepository
+import com.querydsl.core.Tuple
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
+import org.junit.jupiter.api.assertNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import kotlin.test.assertTrue
@@ -23,6 +33,8 @@ class Ch10QueryDslTest {
     val PRICE_CRITERIA = 100000
     val CHEAP_ITEM_COUNT = 10
     val EXPENSIVE_ITEM_COUNT = 20
+    val ORDER_COUNT = 2
+
     enum class OrderingFlow {
         ASC,
         DESC
@@ -37,30 +49,44 @@ class Ch10QueryDslTest {
     lateinit var memberRepository: Ch10MemberRepository
     @Autowired
     lateinit var itemRepository: Ch10ItemRepository
+    @Autowired
+    lateinit var orderRepository: Ch10OrderRepository
+    @Autowired
+    lateinit var orderItemRepository: Ch10OrderItemRepository
 
     @BeforeEach
     fun init() {
         // GIVEN
-        listOf("Michael", "John", "Jonathan", "Tony", "Sam").forEach {
+        val members = listOf("Michael", "John", "Jonathan", "Tony", "Sam").map {
             addMemer(it)
         }
 
         // GIVEN
-        initItems()
+        val items = initItems()
+
+        // GIVEN
+        val randomOrder = makeOrder(members.random(), items.random())
     }
 
-    private fun addMemer(name: String) {
+    private fun makeOrder(member: Ch10Member, item: Ch10Item): Ch10Order {
+        val order = Ch10Order()
+        order.assignMember(member)
+        order.assignItem(item, ORDER_COUNT)
+        return orderRepository.save(order)
+    }
+
+    private fun addMemer(name: String): Ch10Member {
         val member = Ch10Member()
         member.name = name
 
-        val savedMember = memberRepository.save(member)
+        return memberRepository.save(member)
     }
 
-    private fun initItems() {
+    private fun initItems(): List<Ch10Item> {
         val cheapItemInfos = generateItemInfo(0, PRICE_CRITERIA, CHEAP_ITEM_COUNT)
         val expensiveItemInfos = generateItemInfo(PRICE_CRITERIA, PRICE_CRITERIA + 200000, EXPENSIVE_ITEM_COUNT)
 
-        (cheapItemInfos + expensiveItemInfos).forEach { (name, price, stock) ->
+        return (cheapItemInfos + expensiveItemInfos).map { (name, price, stock) ->
             addItem(name, price, stock)
         }
     }
@@ -74,9 +100,9 @@ class Ch10QueryDslTest {
         }
     }
 
-    private fun addItem(name: String, price: Int, stock: Int) {
+    private fun addItem(name: String, price: Int, stock: Int): Ch10Item {
         val item = Ch10Item(name, price, stock)
-        itemRepository.save(item)
+        return itemRepository.save(item)
     }
 
     @Test
@@ -237,6 +263,261 @@ class Ch10QueryDslTest {
         prices.forEach {
             assertTrue { it >= PRICE_CRITERIA }
         }
+    }
+
+    @Test
+    fun join_basic() {
+        val query = JPAQueryFactory(em)
+        val order = QCh10Order.ch10Order
+        val member = QCh10Member.ch10Member
+        val orderItem = QCh10OrderItem.ch10OrderItem
+
+        // Ch10Order의 정보만 가져옴
+        val result = query
+            .from(order)
+            .join(order.member, member)
+            .leftJoin(order.orderItems, orderItem)
+            .fetch()
+
+        assertTrue { result.size == 1 }
+        /**
+         * JPQL:
+         *
+         * select
+         *     ch10Order
+         * from
+         *     Ch10Order ch10Order
+         * inner join
+         *     ch10Order.member as ch10Member
+         * left join
+         *     ch10Order.orderItems as ch10OrderItem
+         * */
+    }
+
+    @Test
+    fun join_select_multiple() {
+        val query = JPAQueryFactory(em)
+        val order = QCh10Order.ch10Order
+        val member = QCh10Member.ch10Member
+        val orderItem = QCh10OrderItem.ch10OrderItem
+        val item = QCh10Item.ch10Item
+
+        // Ch10Order, Ch10Member 정보 가져옴
+        val result1 = query
+            .select(order, member)
+            .from(order)
+            .join(order.member, member)
+            .leftJoin(order.orderItems, orderItem)
+            .fetch()
+        /**
+         * JPQL:
+         *
+         * select
+         *     ch10Order,
+         *     ch10Member
+         * from
+         *     Ch10Order ch10Order
+         * inner join
+         *     ch10Order.member as ch10Member
+         * left join
+         *     ch10Order.orderItems as ch10OrderItem
+         *
+         * SQL:
+         *
+         * select
+         *     co1_0.id,
+         *     co1_0.member_id,
+         *     m1_0.id,
+         *     m1_0.name
+         * from
+         *     ch10order co1_0
+         * join
+         *     ch10member m1_0 on m1_0.id=co1_0.member_id
+         * left join
+         *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id
+         * */
+
+
+        val result2 = query
+            .select(order, member, item)
+            .from(order)
+            .join(order.member, member)
+            .leftJoin(order.orderItems, orderItem)
+            .leftJoin(orderItem.item, item)
+            .fetch()
+        /**
+         * select
+         *     ch10Order,
+         *     ch10Member,
+         *     ch10Item
+         * from
+         *     Ch10Order ch10Order
+         * inner join
+         *     ch10Order.member as ch10Member
+         * left join
+         *     ch10Order.orderItems as ch10OrderItem
+         * left join
+         *     ch10OrderItem.item as ch10Item
+         *
+         *
+         * select
+         *     co1_0.id,
+         *     co1_0.member_id,
+         *     m1_0.id,
+         *     m1_0.name,
+         *     i1_0.id,
+         *     i1_0.name,
+         *     i1_0.price,
+         *     i1_0.stock_quantity
+         * from
+         *     ch10order co1_0
+         * join
+         *     ch10member m1_0 on m1_0.id=co1_0.member_id
+         * left join
+         *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id
+         * left join
+         *     ch10item i1_0 on i1_0.id=oi1_0.item_id
+         *
+         * */
+    }
+
+    @Test
+    fun join_on() {
+        val query = JPAQueryFactory(em)
+
+        val order = QCh10Order.ch10Order
+        val orderItem = QCh10OrderItem.ch10OrderItem
+
+        val result1 = query
+            .select(order, orderItem)
+            .from(order)
+            .leftJoin(order.orderItems, orderItem)
+            .on(orderItem.count.lt(ORDER_COUNT))
+            .fetch()
+        /**
+         * select
+         *     ch10Order,
+         *     ch10OrderItem
+         * from
+         *     Ch10Order ch10Order
+         * left join
+         *     ch10Order.orderItems as ch10OrderItem with ch10OrderItem.count < 2
+         *
+         *
+         * select
+         *     co1_0.id,
+         *     co1_0.member_id,
+         *     oi1_0.id,
+         *     oi1_0.count,
+         *     oi1_0.item_id,
+         *     oi1_0.order_id,
+         *     oi1_0.price
+         * from
+         *     ch10order co1_0
+         * left join
+         *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id and oi1_0.count<2
+         * */
+        result1.forEach { it: Tuple ->
+            val order = it.get(0, Ch10Order::class.java)
+            val orderItem = it.get(1, Ch10OrderItem::class.java)
+            assertNotNull(order)
+            assertNull(orderItem)
+        }
+
+        val result2 = query
+            .select(order, orderItem)
+            .from(order)
+            .leftJoin(order.orderItems, orderItem)
+            .on(orderItem.count.goe(ORDER_COUNT))
+            .fetch()
+
+        result2.forEach { it: Tuple ->
+            val order = it.get(0, Ch10Order::class.java)
+            val orderItem = it.get(1, Ch10OrderItem::class.java)
+            assertNotNull(order)
+            assertNotNull(orderItem)
+        }
+    }
+
+    @Test
+    fun join_fetch_join() {
+        val query = JPAQueryFactory(em)
+
+        val order = QCh10Order.ch10Order
+        val member = QCh10Member.ch10Member
+        val orderItem = QCh10OrderItem.ch10OrderItem
+
+        val result1 = query
+            .from(order)
+            .innerJoin(order.member, member).fetchJoin()
+            .leftJoin(order.orderItems, orderItem).fetchJoin()
+            .fetch()
+
+        /**
+         * select
+         *     ch10Order
+         * from
+         *     Ch10Order ch10Order
+         * inner join
+         *     fetch ch10Order.member as ch10Member
+         * left join
+         *     fetch ch10Order.orderItems as ch10OrderItem
+         *
+         * select
+         *     co1_0.id,
+         *     co1_0.member_id,
+         *     m1_0.id,
+         *     m1_0.name,
+         *     oi1_0.order_id,
+         *     oi1_0.id,
+         *     oi1_0.count,
+         *     oi1_0.item_id,
+         *     oi1_0.price
+         * from
+         *     ch10order co1_0
+         * join
+         *     ch10member m1_0 on m1_0.id=co1_0.member_id
+         * left join
+         *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id
+         * */
+    }
+
+    @Test
+    @DisplayName("""
+        from에 여러 엔티티를 넣어서 세타조인(theta join)을 한다.
+        세타조인: A theta join, also known as a conditional join, is a join operation in relational algebra 
+                that combines tuples from two or more tables based on a specified condition
+                
+        * 사실 아래의 예시는 더 디테일하게 말하면 equijoin이다.
+          세타조인은 이퀴조인을 포함한다.  (집합에서 꽃과 해바라기 처럼 ㅎㅎㅎ)
+    """)
+    fun join_theta_join() {
+        val query = JPAQueryFactory(em)
+
+        val order = QCh10Order.ch10Order
+        val member = QCh10Member.ch10Member
+
+        val result = query.from(order, member)
+            .where(order.member.eq(member))
+            .fetch()
+        /**
+         * select
+         *     ch10Order
+         * from
+         *     Ch10Order ch10Order,
+         *     Ch10Member ch10Member
+         * where
+         *     ch10Order.member = ch10Member
+         *
+         * select
+         *     co1_0.id,
+         *     co1_0.member_id
+         * from
+         *     ch10order co1_0,
+         *     ch10member cm1_0
+         * where
+         *     co1_0.member_id=cm1_0.id
+         * */
     }
 
 }
