@@ -19,7 +19,7 @@ class Ch6V1Delivery {
     @Embedded
     var address: Ch6V1Address? = null
 
-    @OneToOne(mappedBy = "deliver")
+    @OneToOne(mappedBy = "delivery")
     var order: Ch6V1Order? = null
 }
 
