@@ -1,5 +1,6 @@
 package com.example.springdb.study.orm.relation.jpabook_example.ch7_advanced_mapping.practice
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -19,7 +20,7 @@ class Ch7Delivery : RegisterUpdateBaseEntity() {
     @Embedded
     var address: Ch7Address? = null
 
-    @OneToOne(mappedBy = "delivery")
+    @OneToOne(mappedBy = "delivery", cascade = [CascadeType.ALL])
     var order: Ch7Order? = null
 }
 

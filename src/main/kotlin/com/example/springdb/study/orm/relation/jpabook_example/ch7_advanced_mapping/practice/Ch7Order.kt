@@ -1,5 +1,6 @@
 package com.example.springdb.study.orm.relation.jpabook_example.ch7_advanced_mapping.practice
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -32,7 +33,7 @@ class Ch7Order : RegisterUpdateBaseEntity() {
     @Column(nullable = false)
     var status: Ch7OrderStatus = Ch7OrderStatus.READY
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL], orphanRemoval = true)
     var orderItems: MutableSet<Ch7OrderItem> = mutableSetOf()
 
     fun assignMember(member: Ch7Member) {

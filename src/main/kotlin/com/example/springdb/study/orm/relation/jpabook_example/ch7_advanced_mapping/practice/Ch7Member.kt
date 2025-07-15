@@ -1,5 +1,6 @@
 package com.example.springdb.study.orm.relation.jpabook_example.ch7_advanced_mapping.practice
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
@@ -20,7 +21,7 @@ class Ch7Member : RegisterUpdateBaseEntity {
     @Column(nullable = false)
     var address: Ch7Address? = null
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     var orders: MutableSet<Ch7Order> = mutableSetOf()
 
     constructor() : super()
