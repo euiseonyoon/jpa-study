@@ -31,6 +31,7 @@ import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @DataJpaTest
@@ -972,5 +973,38 @@ class Ch10QueryDslTest {
         } else {
             null
         }
+    }
+
+    @Test
+    @DisplayName("""
+        아래 벌크 연산은 queryDsl을 사용하나, JPQL을 사용하나 모두 적용된다.
+        논점인 `영속성 관리` 측면에서 보자.
+    """)
+    fun bulk_process() {
+        // GIVEN
+        val item = QCh10Item.ch10Item
+        val query = JPAQueryFactory(em)
+        val randomItem = query.select(item).from(item).fetchFirst()
+
+        val updateClause = JPAUpdateClause(em, item)
+
+        // WHEN
+        val oldResult = query.select(item).from(item).where(item.price.loe(PRICE_CRITERIA)).fetch()
+        assertTrue { oldResult.size == CHEAP_ITEM_COUNT }
+
+        // PRICE_CRITERIA(10만) 보다 가격이 쌌던 item들의 가격을 PRICE_CRITERIA(10만) 인상한다.
+        val updatedCount = updateClause
+            .where(item.price.loe(PRICE_CRITERIA))
+            .set(item.price, item.price.add(PRICE_CRITERIA))
+            .execute()
+
+        // em.clear()를 하지 않았다.
+
+        // NOTE: 벌크성 업데이트로 가격을 인상했으나, 벌크성 연산을 하기전의 엔티티에서는 아직도 가격이 인상전으로 남아 있다.
+        assertFalse { randomItem!!.price >= PRICE_CRITERIA }
+
+        em.refresh(randomItem)
+        // NOTE: em.refresh()이후, 벌크작업으로 업데이트되 새 가격이 재설정 되었다.
+        assertTrue { randomItem!!.price >= PRICE_CRITERIA }
     }
 }
