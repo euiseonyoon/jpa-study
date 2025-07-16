@@ -14,9 +14,9 @@ import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_la
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10MemberRepository
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderItemRepository
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderRepository
+import com.querydsl.core.BooleanBuilder
 import com.querydsl.core.Tuple
 import com.querydsl.jpa.JPAExpressions
-import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.querydsl.jpa.impl.JPAUpdateClause
 import jakarta.persistence.EntityManager
@@ -911,5 +911,30 @@ class Ch10QueryDslTest {
          *      2. em.flush()는 배치성 작업 후에 하지 않고, 해야하려면 배치성 작업 전에 해야할것 같다.
          *      3. 검색성 쿼리는 배치성 작업 후에 하는것이 적당하다.
          * */
+    }
+
+    @Test
+    fun dynamic_query() {
+        val query = JPAQueryFactory(em)
+        val item = QCh10Item.ch10Item
+
+        // WHEN1
+        val builder = BooleanBuilder()
+        builder.and(item.price.goe(PRICE_CRITERIA))
+        builder.and(item.stockQuantity.lt(MIN_STOCK_QUANTITY))
+
+        // THEN1
+        assertTrue { query.from(item).where(builder).fetch().isEmpty() }
+
+        // WHEN2
+        val builder2 = BooleanBuilder()
+        builder2.and(item.price.loe(PRICE_CRITERIA))
+        builder2.and(item.stockQuantity.goe(MIN_STOCK_QUANTITY))
+        val result = query.select(item).from(item).where(builder2).fetch()
+
+        // THEN2
+        result.forEach { item ->
+            assertTrue { item.price <= PRICE_CRITERIA && item.stockQuantity >= MIN_STOCK_QUANTITY}
+        }
     }
 }
