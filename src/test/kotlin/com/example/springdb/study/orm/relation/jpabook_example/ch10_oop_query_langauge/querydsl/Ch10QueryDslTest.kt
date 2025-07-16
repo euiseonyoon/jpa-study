@@ -29,6 +29,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import kotlin.test.assertFalse
@@ -74,6 +75,7 @@ class Ch10QueryDslTest {
 
         // GIVEN
         items = initItems()
+        em.flush()
     }
 
     private fun makeOrder(member: Ch10Member, items: List<Ch10Item>): Ch10Order {
@@ -1006,5 +1008,59 @@ class Ch10QueryDslTest {
         em.refresh(randomItem)
         // NOTE: em.refresh()이후, 벌크작업으로 업데이트되 새 가격이 재설정 되었다.
         assertTrue { randomItem!!.price >= PRICE_CRITERIA }
+    }
+
+    @Test
+    fun jpql_and_persistent_context() {
+        em.clear()
+        val id = items.random().id
+
+        var emFindResult = em.find(Ch10Item::class.java, id) // SELECT 쿼리 실행
+        emFindResult =  em.find(Ch10Item::class.java, id) // SELECT 쿼리 미발생
+        assertTrue { em.contains(emFindResult) }
+
+        em.clear()
+        var jpqlResult = em.createQuery("SELECT i from Ch10Item i WHERE i.id = :id")
+            .setParameter("id", id)
+            .singleResult // SELECT 쿼리 발생
+        jpqlResult = em.createQuery("SELECT i from Ch10Item i WHERE i.id = :id")
+            .setParameter("id", id)
+            .singleResult // SELECT 쿼리 발생
+        assertTrue { em.contains(jpqlResult) }
+
+        em.clear()
+        val sql = "SELECT * FROM ch10item WHERE id=?"
+        val nativeQueryWithClass = em.createNativeQuery(sql, Ch10Item::class.java)
+            .setParameter(1, id)
+
+        var nativeQueryResult = nativeQueryWithClass.singleResult // SELECT 쿼리 발생
+        nativeQueryResult = nativeQueryWithClass.singleResult // SELECT 쿼리 발생
+        assertTrue { em.contains(nativeQueryResult) }
+
+        em.clear()
+        val nativeQueryWithoutClass = em.createNativeQuery(sql)
+            .setParameter(1, id)
+        var nativeQueryWithoutClasResult = nativeQueryWithoutClass.singleResult // SELECT 쿼리 발생
+        nativeQueryWithoutClasResult = nativeQueryWithoutClass.singleResult // SELECT 쿼리 발생
+
+        assertThrows<IllegalArgumentException> {
+            em.contains(nativeQueryWithoutClasResult)
+        }
+
+        /**
+         *
+         * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         * | No | 조회 방식                                   | 1차 캐시에 있을 때 쿼리 발생        | 결과물이 영속성 컨텍스트 관리       |            비고            |
+         * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         * | 1  | em.find(엔티티, id)                         |          ✘ (조회 안 함)        |           ✔ (관리됨)          | 기본 조회, 1차 캐시 활용    |
+         * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         * | 2  | JPQL 쿼리 (createQuery)                     |          ✔ (항상 DB 조회)     |           ✔ (관리됨)           | 매번 DB 조회, 영속성 컨텍스트 등록  |
+         * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         * | 3  | Native Query (createNativeQuery + 엔티티)  |          ✔ (항상 DB 조회)      |           ✔ (관리됨)            | 네이티브 쿼리지만 엔티티 매핑       |
+         * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         * | 4  | Native Query (createNativeQuery)          |      ✔ (항상 DB 조회)          |       ✘ (관리 안됨, 예외)       |  비엔티티 결과, 영속성 컨텍스트 미관리 |
+         * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         *
+         * */
     }
 }
