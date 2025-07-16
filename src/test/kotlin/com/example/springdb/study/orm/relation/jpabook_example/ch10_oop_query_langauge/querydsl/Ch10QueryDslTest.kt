@@ -6,6 +6,7 @@ import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_la
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10Order
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10OrderItem
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Item
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Item.ch10Item
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10ItemDto
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Member
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Order
@@ -16,6 +17,7 @@ import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_la
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderRepository
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.core.Tuple
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.querydsl.jpa.impl.JPAUpdateClause
@@ -935,6 +937,40 @@ class Ch10QueryDslTest {
         // THEN2
         result.forEach { item ->
             assertTrue { item.price <= PRICE_CRITERIA && item.stockQuantity >= MIN_STOCK_QUANTITY}
+        }
+    }
+
+    @Test
+    fun method_delegation() {
+        val query = JPAQueryFactory(em)
+        val item = ch10Item
+
+        // WHEN
+        val result = query
+            .select(item)
+            .from(item)
+            .where(getCheapPriceItem(item, PRICE_CRITERIA), getEnoughStockedItem(item, MIN_STOCK_QUANTITY))
+            .fetch()
+
+        // THEN
+        result.forEach { item ->
+            assertTrue { item.price <= PRICE_CRITERIA && item.stockQuantity >= MIN_STOCK_QUANTITY}
+        }
+    }
+
+    private fun getCheapPriceItem(item: QCh10Item?, price: Int): BooleanExpression? {
+        return if (item != null) {
+            item.price.loe(price)
+        } else {
+            null
+        }
+    }
+
+    private fun getEnoughStockedItem(item: QCh10Item?, minStock: Int): BooleanExpression? {
+        return if (item != null) {
+            item.stockQuantity.goe(minStock)
+        } else {
+            null
         }
     }
 }
