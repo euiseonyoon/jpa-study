@@ -22,6 +22,7 @@ import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.querydsl.jpa.impl.JPAUpdateClause
 import jakarta.persistence.EntityManager
+import jakarta.persistence.FlushModeType
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
@@ -1060,6 +1061,73 @@ class Ch10QueryDslTest {
          * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
          * | 4  | Native Query (createNativeQuery)          |      ✔ (항상 DB 조회)          |       ✘ (관리 안됨, 예외)       |  비엔티티 결과, 영속성 컨텍스트 미관리 |
          * +----+---------------------------------------------+------------------------------+------------------------------+---------------------------+
+         *
+         * */
+    }
+
+    @Test
+    fun flush_mode() {
+        /**
+         * em.flush()를 해야 DB에 반영이 된다
+         * flush()에는 두 개의 모드가 있다.
+         *
+         * 1. AUTO (default)
+         *      커밋 또는 쿼리실행시에 플러시 -> DB에 반영된다
+         *
+         * 2. COMMIT
+         *      커밋이 일어날 경우에만 플러시 -> DB에 반영된다.
+         *
+         * */
+
+        em.clear()
+        val id = items.random().id
+        val item = em.find(Ch10Item::class.java, id)
+
+        // COMMIT 모드로 설정
+        em.flushMode = FlushModeType.COMMIT
+
+        item.price = 99999999
+
+        //  em.flush()를 하지 않고 진행
+        // 여기서 일반적으로 em.find(Ch10Item::class.java, id)를 하면 price=99999999가 DB에 적용되지 않는다.
+        val second = em.find(Ch10Item::class.java, id)
+        /**
+         * second == item (영속성 컨텍스트에서 가져오기 때문에 가격은 둘다 99999999)
+         *
+         * 하지만 여기서 종료한다면 새 가격 적용이 안됨.
+         *
+         * DB에 적용하려면
+         *
+         * 1. em.flush() 수동으로 call
+         * 2. 혹은 아래 코드 처럼 query를 하면됨 (flush 모드 변경)
+         * */
+        val jpqlResult = em.createQuery("SELECT i from Ch10Item i WHERE i.id = :id")
+            .setParameter("id", id)
+            .setFlushMode(FlushModeType.AUTO) // <--- 이 부분
+            .singleResult // SELECT 쿼리 발생
+
+        /**
+         * FlushModeType.COMMIT은 사용 하기에 데이터 무결성을 보장하지 않아서 위험하다.
+         * 하지만 성능향상에 도움이 될 수 있다.
+         * 아래와 같은 경우, 많이 flush가 일어나기 때문에 성능이 떨어질 수 있다.
+         * FlushModeType.COMMIT으로 하여, 마지막에 em.flush() 한 번 호출로 성능을 향상 시킬 수 있다.
+         *
+         * 예:
+         *
+         *  // 비지니스 로직이 아래와 같다면
+         *  영속성_컨텍스트_등록()
+         *  검색성_쿼리()  <-- flush 발생
+         *
+         *  영속성_컨텍스트_등록()
+         *  영속성_컨텍스트_등록()
+         *  검색성_쿼리()  <-- flush 발생
+         *
+         *  영속성_컨텍스트_등록()
+         *  검색성_쿼리()  <-- flush 발생
+         *
+         *  커밋()  <-- flush 발생
+         *
+         *
          *
          * */
     }
