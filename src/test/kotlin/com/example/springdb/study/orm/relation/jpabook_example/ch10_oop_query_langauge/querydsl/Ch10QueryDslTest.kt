@@ -14,6 +14,7 @@ import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_la
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderItemRepository
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderRepository
 import com.querydsl.core.Tuple
+import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -34,6 +35,7 @@ class Ch10QueryDslTest {
     val CHEAP_ITEM_COUNT = 10
     val EXPENSIVE_ITEM_COUNT = 20
     val ORDER_COUNT = 2
+    val MIN_STOCK_QUANTITY = 5
 
     enum class OrderingFlow {
         ASC,
@@ -54,18 +56,22 @@ class Ch10QueryDslTest {
     @Autowired
     lateinit var orderItemRepository: Ch10OrderItemRepository
 
+    var items: List<Ch10Item> = listOf()
+    var randomOrder: Ch10Order = Ch10Order()
+    var members: List<Ch10Member> = listOf()
+
     @BeforeEach
     fun init() {
         // GIVEN
-        val members = listOf("Michael", "John", "Jonathan", "Tony", "Sam").map {
+        members = listOf("Michael", "John", "Jonathan", "Tony", "Sam").map {
             addMemer(it)
         }
 
         // GIVEN
-        val items = initItems()
+        items = initItems()
 
         // GIVEN
-        val randomOrder = makeOrder(members.random(), items.random())
+        randomOrder = makeOrder(members.random(), items.random())
     }
 
     private fun makeOrder(member: Ch10Member, item: Ch10Item): Ch10Order {
@@ -94,7 +100,7 @@ class Ch10QueryDslTest {
     private fun generateItemInfo(min: Int, max: Int, itemCount: Int):  List<Triple<String, Int, Int>> {
         return (0 until itemCount).map { it ->
             val price = (min..max).random()
-            val stock = (10..20).random()
+            val stock = (MIN_STOCK_QUANTITY..20).random()
             val name = "item_$price"
             Triple(name, price, stock)
         }
@@ -517,6 +523,157 @@ class Ch10QueryDslTest {
          *     ch10member cm1_0
          * where
          *     co1_0.member_id=cm1_0.id
+         * */
+    }
+
+    @Test
+    fun sub_query_single() {
+        val query = JPAQueryFactory(em)
+
+        val item = QCh10Item.ch10Item
+        val itemSub = QCh10Item("itemSub")
+
+        // WHEN
+        val maxPriceSubQuery = JPAExpressions
+            .select(itemSub.price.max())
+            .from(itemSub)
+            // 책에 나와있는 unique()는 QueryDsl 5.X 이후로 없어짐
+
+        val result = query.from(item)
+            .where(item.price.eq(maxPriceSubQuery))
+            .fetchOne()
+        val mostExpensiveItem = items.maxByOrNull { it.price }
+
+        // THEN
+        assertTrue { result == mostExpensiveItem }
+
+        /**
+         * select
+         *     ch10Item
+         * from
+         *     Ch10Item ch10Item
+         * where
+         *     ch10Item.price = (
+         *         select
+         *             max(itemSub.price)
+         *         from
+         *             Ch10Item itemSub
+         *     )
+         *
+         * select
+         *     ci1_0.id,
+         *     ci1_0.name,
+         *     ci1_0.price,
+         *     ci1_0.stock_quantity
+         * from
+         *     ch10item ci1_0
+         * where
+         *     ci1_0.price=(
+         *         select
+         *             max(ci2_0.price)
+         *         from
+         *             ch10item ci2_0
+         *     )
+         * */
+
+        // WHEN
+        val negativePriceSubQuery = JPAExpressions
+            .select(itemSub.price)
+            .from(itemSub)
+            .where(itemSub.price.lt(0))
+
+        val result2 = query.from(item)
+            .where(item.price.loe(negativePriceSubQuery))
+            .fetchOne()
+
+        // THEN
+        assertNull(result2)
+    }
+
+    @Test
+    fun sub_query_multiply() {
+        val randomOrderName = randomOrder.member!!.name!!
+        val randomOrderMostStockItem = randomOrder.orderItems.maxByOrNull { it.item!!.stockQuantity }
+
+        log.info("order.member.name={}", randomOrderName)
+        log.info("randomOrderMostStockItem={}", randomOrderMostStockItem)
+
+        val query = JPAQueryFactory(em)
+
+        val orderItem = QCh10OrderItem.ch10OrderItem
+        val memberSubQuery = QCh10Member("memberSubQuery")
+        val itemSubQuery = QCh10Item("itemSubQuery")
+
+        // 주문을 시킨 사람을 찾음
+        val memberNameEndsWith = JPAExpressions
+            .select(memberSubQuery)
+            .from(memberSubQuery)
+            .where(memberSubQuery.name.endsWithIgnoreCase(randomOrderName.takeLast(2)))
+
+        // 주문한 item중 수량이 충분한것만 찾는다. (모두 MIN_STOCK_QUANTITY 이상으로 init되어 있다.)
+        val enoughStockItems = JPAExpressions
+            .select(itemSubQuery)
+            .from(itemSubQuery)
+            .where(itemSubQuery.stockQuantity.goe(MIN_STOCK_QUANTITY))
+
+        val result1 =query.from(orderItem)
+            .where(
+                orderItem.order.member.eq(memberNameEndsWith)
+                    .and(orderItem.item.`in`(enoughStockItems))
+            ).fetch()
+
+        /**
+         * select
+         *     ch10OrderItem
+         * from
+         *     Ch10OrderItem ch10OrderItem
+         * where
+         *     ch10OrderItem.order.member = (
+         *         select
+         *             memberSubQuery
+         *         from
+         *             Ch10Member memberSubQuery
+         *         where
+         *             lower(memberSubQuery.name) like ?1 escape '!'
+         *     )
+         *     and ch10OrderItem.item in (
+         *         select
+         *             itemSubQuery
+         *         from
+         *             Ch10Item itemSubQuery
+         *         where
+         *             itemSubQuery.stockQuantity >= ?2
+         *     )
+         *
+         *
+         * select
+         *     coi1_0.id,
+         *     coi1_0.count,
+         *     coi1_0.item_id,
+         *     coi1_0.order_id,
+         *     coi1_0.price
+         * from
+         *     ch10order_item coi1_0
+         * join
+         *     ch10order o1_0
+         *         on o1_0.id=coi1_0.order_id
+         * where
+         *     o1_0.member_id=(
+         *         select
+         *             cm1_0.id
+         *         from
+         *             ch10member cm1_0
+         *         where
+         *             lower(cm1_0.name) like ? escape '!'
+         *     )
+         *     and coi1_0.item_id in (
+         *         select
+         *             ci1_0.id
+         *         from
+         *             ch10item ci1_0
+         *         where
+         *             ci1_0.stock_quantity>=?
+         *     )
          * */
     }
 
