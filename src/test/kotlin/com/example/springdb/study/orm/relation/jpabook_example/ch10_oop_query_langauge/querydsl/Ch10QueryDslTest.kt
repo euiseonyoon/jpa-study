@@ -16,7 +16,9 @@ import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_la
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.repositories.Ch10OrderRepository
 import com.querydsl.core.Tuple
 import com.querydsl.jpa.JPAExpressions
+import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.querydsl.jpa.impl.JPAUpdateClause
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
@@ -859,5 +861,55 @@ class Ch10QueryDslTest {
 
         assertTrue { cheapItems.size == CHEAP_ITEM_COUNT }
         assertTrue { expensiveItems.size == EXPENSIVE_ITEM_COUNT }
+    }
+
+    @Test
+    fun update_delete_batch_query() {
+        // GIVEN
+        val item = QCh10Item.ch10Item
+        val query = JPAQueryFactory(em)
+        val updateClause = JPAUpdateClause(em, item)
+        // 삭제 작업시 deleteClause 사용
+        // val deleteClause = JPADeleteClause(em, item)
+
+        // WHEN
+        val oldResult = query.select(item).from(item).where(item.price.loe(PRICE_CRITERIA)).fetch()
+        assertTrue { oldResult.size == CHEAP_ITEM_COUNT }
+
+        val updatedCount = updateClause
+            .where(item.price.loe(PRICE_CRITERIA))
+            .set(item.price, item.price.add(PRICE_CRITERIA))
+            .execute()
+
+        // THEN
+        assertTrue { updatedCount == CHEAP_ITEM_COUNT.toLong() }
+        val result = query.from(item).where(item.price.loe(PRICE_CRITERIA)).fetch()
+        assertTrue { result.isEmpty() }
+
+        /**
+         * 주의:
+         *    QueryDSL을 통해 수정, 삭제 같은 배치쿼리를 수행하면, 영속성 컨텍스트를 무시하고 바로 DB에 직접 쿼리를 적용한다.
+         *    (JPQL 배치 쿼리도 똑같음)
+         *
+         *  예:
+         *          val item = itemRepository.findById(1L).get()
+         *          item.price = 200
+         *
+         *          // QueryDSL로 배치 업데이트
+         *          queryFactory.update(QCh10Item.ch10Item)
+         *              .set(QCh10Item.ch10Item.price, 9999)
+         *              .where(QCh10Item.ch10Item.id.eq(1L))
+         *              .execute()
+         *
+         *          em.flush()  <--- 여기서 문제 발생
+         *          em.clear()
+         *
+         *  이렇게 되면, 가격이   DB에서: 기존가격 --> 9999 --> 200(flush() 때문에 다시 업데이트)으로 된다.
+         *
+         *  결론:
+         *      1. 배치성 작업 후, em.clear()를 해서 영속성 캐시(1차 캐시)를 정리해주는것도 좋다.
+         *      2. em.flush()는 배치성 작업 후에 하지 않고, 해야하려면 배치성 작업 전에 해야할것 같다.
+         *      3. 검색성 쿼리는 배치성 작업 후에 하는것이 적당하다.
+         * */
     }
 }
