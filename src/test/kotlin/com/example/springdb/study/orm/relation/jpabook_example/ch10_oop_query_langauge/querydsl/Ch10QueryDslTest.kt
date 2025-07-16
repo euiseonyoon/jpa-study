@@ -57,7 +57,6 @@ class Ch10QueryDslTest {
     lateinit var orderItemRepository: Ch10OrderItemRepository
 
     var items: List<Ch10Item> = listOf()
-    var randomOrder: Ch10Order = Ch10Order()
     var members: List<Ch10Member> = listOf()
 
     @BeforeEach
@@ -69,15 +68,14 @@ class Ch10QueryDslTest {
 
         // GIVEN
         items = initItems()
-
-        // GIVEN
-        randomOrder = makeOrder(members.random(), items.random())
     }
 
-    private fun makeOrder(member: Ch10Member, item: Ch10Item): Ch10Order {
+    private fun makeOrder(member: Ch10Member, items: List<Ch10Item>): Ch10Order {
         val order = Ch10Order()
         order.assignMember(member)
-        order.assignItem(item, ORDER_COUNT)
+        items.forEach { item ->
+            order.assignItem(item, ORDER_COUNT)
+        }
         return orderRepository.save(order)
     }
 
@@ -131,9 +129,11 @@ class Ch10QueryDslTest {
          *     first ? rows only
          * */
 
+        // WHEN
         predicate = queryType.name.startsWithIgnoreCase("jo")
             .and(queryType.name.endsWithIgnoreCase("an"))
 
+        // THEN
         val jonathan = memberRepository.findOne(predicate)
         assertTrue { jonathan.isPresent }
 
@@ -181,6 +181,7 @@ class Ch10QueryDslTest {
         val query = JPAQueryFactory(em)
         val item = QCh10Item.ch10Item
 
+        // WHEN
         val result: List<Ch10Item> = query.select(item)
             .from(item)
             .where(item.price.loe(PRICE_CRITERIA))
@@ -220,6 +221,7 @@ class Ch10QueryDslTest {
          * fetch
          *     first 10 rows only*/
 
+        // THEN
         assertTrue { result.size <= perPage }
         assertTrue {
             checkOrdering(result.map { it.price }, OrderingFlow.DESC)
@@ -231,6 +233,8 @@ class Ch10QueryDslTest {
     fun grouping() {
         val query = JPAQueryFactory(em)
         val item = QCh10Item.ch10Item
+
+        // WHEN
         val result = query.select(item)
             .from(item)
             .groupBy(item.price) // price로 그룹
@@ -264,6 +268,7 @@ class Ch10QueryDslTest {
          *     ci1_0.price>=100000
          * */
 
+        // THEN
         val prices = result.map { it.price }.toSet()
         assertTrue { prices.size == result.size }
         prices.forEach {
@@ -273,18 +278,24 @@ class Ch10QueryDslTest {
 
     @Test
     fun join_basic() {
+        // GIVEN
+        makeOrder(members.random(), listOf(items.random()))
+        em.flush()
+        em.clear()
+
         val query = JPAQueryFactory(em)
         val order = QCh10Order.ch10Order
         val member = QCh10Member.ch10Member
         val orderItem = QCh10OrderItem.ch10OrderItem
 
-        // Ch10Order의 정보만 가져옴
+        // WHEN : Ch10Order의 정보만 가져옴
         val result = query
             .from(order)
             .join(order.member, member)
             .leftJoin(order.orderItems, orderItem)
             .fetch()
 
+        // THEN
         assertTrue { result.size == 1 }
         /**
          * JPQL:
@@ -302,13 +313,18 @@ class Ch10QueryDslTest {
 
     @Test
     fun join_select_multiple() {
+        // GIVEN
+        makeOrder(members.random(), listOf(items.random()))
+        em.flush()
+        em.clear()
+
         val query = JPAQueryFactory(em)
         val order = QCh10Order.ch10Order
         val member = QCh10Member.ch10Member
         val orderItem = QCh10OrderItem.ch10OrderItem
         val item = QCh10Item.ch10Item
 
-        // Ch10Order, Ch10Member 정보 가져옴
+        // WHEN : Ch10Order, Ch10Member 정보 가져옴
         val result1 = query
             .select(order, member)
             .from(order)
@@ -343,7 +359,7 @@ class Ch10QueryDslTest {
          *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id
          * */
 
-
+        // WHEN
         val result2 = query
             .select(order, member, item)
             .from(order)
@@ -389,11 +405,16 @@ class Ch10QueryDslTest {
 
     @Test
     fun join_on() {
+        makeOrder(members.random(), listOf(items.random()))
+        em.flush()
+        em.clear()
+
         val query = JPAQueryFactory(em)
 
         val order = QCh10Order.ch10Order
         val orderItem = QCh10OrderItem.ch10OrderItem
 
+        // WHEN
         val result1 = query
             .select(order, orderItem)
             .from(order)
@@ -423,6 +444,7 @@ class Ch10QueryDslTest {
          * left join
          *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id and oi1_0.count<2
          * */
+        // THEN
         result1.forEach { it: Tuple ->
             val order = it.get(0, Ch10Order::class.java)
             val orderItem = it.get(1, Ch10OrderItem::class.java)
@@ -430,6 +452,7 @@ class Ch10QueryDslTest {
             assertNull(orderItem)
         }
 
+        // WHEN
         val result2 = query
             .select(order, orderItem)
             .from(order)
@@ -447,12 +470,18 @@ class Ch10QueryDslTest {
 
     @Test
     fun join_fetch_join() {
+        // GIVEN
+        makeOrder(members.random(), listOf(items.random()))
+        em.flush()
+        em.clear()
+
         val query = JPAQueryFactory(em)
 
         val order = QCh10Order.ch10Order
         val member = QCh10Member.ch10Member
         val orderItem = QCh10OrderItem.ch10OrderItem
 
+        // WHEN
         val result1 = query
             .from(order)
             .innerJoin(order.member, member).fetchJoin()
@@ -498,11 +527,17 @@ class Ch10QueryDslTest {
           세타조인은 이퀴조인을 포함한다.  (집합에서 꽃과 해바라기 처럼 ㅎㅎㅎ)
     """)
     fun join_theta_join() {
+        // GIVEN
+        makeOrder(members.random(), listOf(items.random()))
+        em.flush()
+        em.clear()
+
         val query = JPAQueryFactory(em)
 
         val order = QCh10Order.ch10Order
         val member = QCh10Member.ch10Member
 
+        // WHEN
         val result = query.from(order, member)
             .where(order.member.eq(member))
             .fetch()
@@ -592,6 +627,11 @@ class Ch10QueryDslTest {
 
     @Test
     fun sub_query_multiply() {
+        // GIVEN
+        val randomOrder = makeOrder(members.random(), listOf(items.random()))
+        em.flush()
+        em.clear()
+
         val randomOrderName = randomOrder.member!!.name!!
         val randomOrderMostStockItem = randomOrder.orderItems.maxByOrNull { it.item!!.stockQuantity }
 
@@ -604,7 +644,7 @@ class Ch10QueryDslTest {
         val memberSubQuery = QCh10Member("memberSubQuery")
         val itemSubQuery = QCh10Item("itemSubQuery")
 
-        // 주문을 시킨 사람을 찾음
+        // WHEN : 주문을 시킨 사람을 찾음
         val memberNameEndsWith = JPAExpressions
             .select(memberSubQuery)
             .from(memberSubQuery)
@@ -676,5 +716,4 @@ class Ch10QueryDslTest {
          *     )
          * */
     }
-
 }
