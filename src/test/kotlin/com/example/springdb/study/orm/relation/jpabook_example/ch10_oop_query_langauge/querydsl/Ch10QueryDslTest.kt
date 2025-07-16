@@ -6,6 +6,7 @@ import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_la
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10Order
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.Ch10OrderItem
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Item
+import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10ItemDto
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Member
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10Order
 import com.example.springdb.study.orm.relation.jpabook_example.ch10_oop_query_langauge.querydsl.examples.models.QCh10OrderItem
@@ -87,7 +88,7 @@ class Ch10QueryDslTest {
     }
 
     private fun initItems(): List<Ch10Item> {
-        val cheapItemInfos = generateItemInfo(0, PRICE_CRITERIA, CHEAP_ITEM_COUNT)
+        val cheapItemInfos = generateItemInfo(0, PRICE_CRITERIA - 1, CHEAP_ITEM_COUNT)
         val expensiveItemInfos = generateItemInfo(PRICE_CRITERIA, PRICE_CRITERIA + 200000, EXPENSIVE_ITEM_COUNT)
 
         return (cheapItemInfos + expensiveItemInfos).map { (name, price, stock) ->
@@ -715,5 +716,148 @@ class Ch10QueryDslTest {
          *             ci1_0.stock_quantity>=?
          *     )
          * */
+    }
+
+
+    @Test
+    @DisplayName("""
+        프로젝션의 대상이 하나면, 해당 타입으로 반환한다. ( 아래는 프로젝션의 대상이 Ch10Item.name(String) )
+    """)
+    fun projection_simple() {
+        val query = JPAQueryFactory(em)
+
+        val item = QCh10Item.ch10Item
+
+        val result = query
+            .select(item.name)
+            .from(item)
+            .fetch()
+
+        result.forEach {
+            assertTrue { it is String }
+        }
+    }
+
+    @Test
+    fun projection_tuple1() {
+        val query = JPAQueryFactory(em)
+
+        val item = QCh10Item.ch10Item
+
+        val result: List<Tuple> = query
+            .select(item.name, item.price)
+            .from(item)
+            .fetch()
+
+        result.forEach { tuple ->
+            val name: String? = tuple.get(item.name)
+            val price: Int? = tuple.get(item.price)
+            // val name = tuple.get(0, String::class.java)
+            // val price = tuple.get(1, Int::class.java)
+            assertTrue { name is String }
+            assertTrue { price is Int }
+        }
+    }
+
+    @Test
+    fun projection_tuple2() {
+        // GIVEN
+        val RANDOM1_ITEM_COUNT = 2
+        val RANDOM2_ITEM_COUNT = 1
+
+        val randomMember1 = members.random()
+        val randomMember2 = (members - randomMember1).random()
+        val randomOrder1 = makeOrder(randomMember1, items.shuffled().take(RANDOM1_ITEM_COUNT))
+        val randomOrder2 = makeOrder(randomMember2, items.shuffled().take(RANDOM2_ITEM_COUNT))
+
+        em.persist(randomOrder1)
+        em.persist(randomOrder2)
+        em.flush()
+        em.clear()
+
+        val query = JPAQueryFactory(em)
+
+        val order = QCh10Order.ch10Order
+        val orderItem = QCh10OrderItem.ch10OrderItem
+        val item = QCh10Item.ch10Item
+        val member = QCh10Member.ch10Member
+
+        // WHEN
+        val result = query
+            .select(order, item)
+            .from(order)
+            .join(order.member, member).fetchJoin()
+            .leftJoin(order.orderItems, orderItem)
+            .leftJoin(orderItem.item, item)
+            .fetch()
+
+        /**
+         * select
+         *     ch10Order,
+         *     ch10Item
+         * from
+         *     Ch10Order ch10Order
+         * inner join
+         *
+         * fetch
+         *     ch10Order.member as ch10Member
+         * left join
+         *     ch10Order.orderItems as ch10OrderItem
+         * left join
+         *     ch10OrderItem.item as ch10Item
+         *
+         *
+         * select
+         *     co1_0.id,
+         *     co1_0.member_id,
+         *     m1_0.id,
+         *     m1_0.name,
+         *     i1_0.id,
+         *     i1_0.name,
+         *     i1_0.price,
+         *     i1_0.stock_quantity
+         * from
+         *     ch10order co1_0
+         * join
+         *     ch10member m1_0 on m1_0.id=co1_0.member_id
+         * left join
+         *     ch10order_item oi1_0 on co1_0.id=oi1_0.order_id
+         * left join
+         *     ch10item i1_0 on i1_0.id=oi1_0.item_id
+         * */
+
+        // THEN
+        val memberToItemsMap: Map<Long, List<Ch10Item>> = result
+            .groupBy { tuple ->
+                tuple.get(order)?.member!!.id!!
+            }
+            .mapValues { entry: Map.Entry<Long, List<Tuple>> ->
+                entry.value.mapNotNull { it.get(item) }
+            }
+
+        assertTrue { memberToItemsMap.keys.contains(randomMember1.id) }
+        assertTrue { memberToItemsMap.keys.contains(randomMember2.id) }
+
+        assertTrue { memberToItemsMap[randomMember1.id]?.size == RANDOM1_ITEM_COUNT }
+        assertTrue { memberToItemsMap[randomMember2.id]?.size == RANDOM2_ITEM_COUNT }
+    }
+
+    @Test
+    fun projection_dto() {
+        val query = JPAQueryFactory(em)
+
+        val item = QCh10Item.ch10Item
+
+        // WHEN
+        val result = query
+            .select(QCh10ItemDto(item.name, item.price, item.stockQuantity ))
+            .from(item)
+            .fetch()
+
+        // THEN
+        val (cheapItems, expensiveItems) = result.partition { it.price < PRICE_CRITERIA }
+
+        assertTrue { cheapItems.size == CHEAP_ITEM_COUNT }
+        assertTrue { expensiveItems.size == EXPENSIVE_ITEM_COUNT }
     }
 }
