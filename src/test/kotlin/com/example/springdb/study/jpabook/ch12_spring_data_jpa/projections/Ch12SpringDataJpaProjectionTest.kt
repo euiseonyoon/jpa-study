@@ -199,4 +199,82 @@ class Ch12SpringDataJpaProjectionTest {
         }
     }
 
+    @Test
+    fun string_base_query_jpql_nested_interfaces() {
+        // GIVEN
+        val randomMember = members.random()
+        val randomItems = items.shuffled().take(2)
+        val madeOrder = makeOrder(randomMember, randomItems)
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val result = orderItemRepository.searchByCountToNestedInterface(ORDER_COUNT)
+
+        // THEN
+        result.forEach { it ->
+            assertEquals(randomMember.id, it.order.member.id)
+        }
+        val randomItemIdSet = randomItems.map { it.id }.toSet()
+        val resultItemIdSet = result.map { it.item.id }.toSet()
+        assertEquals(randomItemIdSet, resultItemIdSet)
+
+        // 위의 derived_query_nested_interfaces와 동일 query 발생
+    }
+
+    @Test
+    fun string_base_query_jpql_nested_class_dto() {
+        // GIVEN
+        val randomMember = members.random()
+        val randomItems = items.shuffled().take(2)
+        val madeOrder = makeOrder(randomMember, randomItems)
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val result = orderItemRepository.searchByCountToNestedDto(ORDER_COUNT)
+
+        // THEN
+        result.forEach { it ->
+            assertEquals(madeOrder.id, it.order.id)
+        }
+        assertEquals(randomItems.map { it.id }.toSet(), result.map { it.item.id }.toSet())
+        assertEquals(randomItems.map { it.name }.toSet(), result.map { it.item.name }.toSet())
+        /**
+         * JPA가 알아서 만들어주는 DerivedQuery를 사용할 때에는 nested Class Dto projection이 잘 안되었다.
+         * 하지만 @Query와 같이 우리가 쿼리를 쓰면서 nested class dto의 생성자를 하나씩 지정하면 projection이 잘 되었다.
+         *
+         *
+         * 발생 쿼리:
+         *
+         *  JPQL:
+         *      SELECT
+         *          new com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12NestedOrderItemDto(
+         *              oi.count,
+         *              new com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12OrderDto(oi.order.id),
+         *              new com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemDto(oi.item.id, oi.item.name)
+         *          )
+         *      FROM
+         *          Ch12OrderItem oi
+         *      WHERE
+         *          oi.count = :count
+         *
+         *
+         *  SQL:
+         *      select
+         *          coi1_0.count,
+         *          coi1_0.order_id,
+         *          coi1_0.item_id,
+         *          i1_0.name
+         *      from
+         *          ch12order_item coi1_0
+         *      join
+         *          ch12item i1_0
+         *              on i1_0.id=coi1_0.item_id
+         * where
+         *     coi1_0.count=?
+         * */
+    }
+
+
 }
