@@ -179,4 +179,24 @@ class Ch12SpringDataJpaProjectionTest {
          * */
     }
 
+    @Test
+    fun string_base_query_interface_projection() {
+        val randomItem = items.random()
+        val result = itemRepository.searchByNameToInterface(randomItem.name!!)
+
+        result.forEach {
+            assertEquals(randomItem.stockQuantity, it.stockQuantity)
+        }
+    }
+
+    @Test
+    fun string_base_query_class_dto_projection() {
+        val randomItem = items.random()
+        val result = itemRepository.searchByNameToDto(randomItem.name!!)
+
+        result.forEach {
+            assertEquals(randomItem.name!!, it.name)
+        }
+    }
+
 }
