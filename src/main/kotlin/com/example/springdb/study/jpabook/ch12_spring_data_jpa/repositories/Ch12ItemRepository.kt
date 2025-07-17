@@ -5,12 +5,13 @@ import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12I
 import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemNativeDto
 import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemNativeInterfaceResult
 import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemStockQuantityOnly
+import com.example.springdb.study.jpabook.ch12_spring_data_jpa.querydsl_extension.Ch12ItemRepositoryExtension
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.NativeQuery
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-interface Ch12ItemRepository : JpaRepository<Ch12Item, Long> {
+interface Ch12ItemRepository : JpaRepository<Ch12Item, Long>, Ch12ItemRepositoryExtension {
 
     // @Query, @NativeQuery가 아닌 Derived queries -> Interface 예시
     // https://docs.spring.io/spring-data/jpa/reference/repositories/projections.html#_derived_queries
