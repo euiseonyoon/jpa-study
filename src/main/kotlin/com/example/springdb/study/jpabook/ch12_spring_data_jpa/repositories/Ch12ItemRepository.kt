@@ -2,8 +2,11 @@ package com.example.springdb.study.jpabook.ch12_spring_data_jpa.repositories
 
 import com.example.springdb.study.jpabook.ch12_spring_data_jpa.models.Ch12Item
 import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemNameOnlyDto
+import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemNativeDto
+import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemNativeInterfaceResult
 import com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemStockQuantityOnly
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.NativeQuery
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
@@ -41,4 +44,16 @@ interface Ch12ItemRepository : JpaRepository<Ch12Item, Long> {
        WHERE i.name = :name 
     """)
     fun searchByNameToDto(@Param("name") name: String): List<Ch12ItemNameOnlyDto>
+
+
+    @NativeQuery(
+        value = "SELECT * FROM ch12item WHERE ch12item.id = :id",
+        sqlResultSetMapping = "Ch12ItemNativeQueryDto"
+    )
+    fun searchByIdUsingNativeQueryToDto(@Param("id") id: Long): Ch12ItemNativeDto
+
+    @NativeQuery(
+        value = "SELECT * FROM ch12item WHERE ch12item.id = :id",
+    )
+    fun searchByIdUsingNativeQueryToInterface(@Param("id") id: Long): Ch12ItemNativeInterfaceResult
 }

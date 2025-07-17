@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import kotlin.collections.forEach
 import kotlin.ranges.random
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @DataJpaTest
 class Ch12SpringDataJpaProjectionTest {
@@ -276,5 +277,23 @@ class Ch12SpringDataJpaProjectionTest {
          * */
     }
 
+    @Test
+    fun native_query_class_dto_projection() {
+        val randomItem = items.random()
+        val result = itemRepository.searchByIdUsingNativeQueryToDto(randomItem.id!!)
 
+        assertTrue { result.name == randomItem.name }
+        assertTrue { result.stock == randomItem.stockQuantity }
+        assertTrue { result.price == randomItem.price }
+    }
+
+    @Test
+    fun native_query_class_interface_projection() {
+        val randomItem = items.random()
+        val result = itemRepository.searchByIdUsingNativeQueryToInterface(randomItem.id!!)
+
+        assertTrue { result.name == randomItem.name }
+        assertTrue { result.stockQuantity == randomItem.stockQuantity }
+        assertTrue { result.price == randomItem.price }
+    }
 }
