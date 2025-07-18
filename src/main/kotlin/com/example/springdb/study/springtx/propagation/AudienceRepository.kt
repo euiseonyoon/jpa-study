@@ -23,6 +23,6 @@ class AudienceRepository(
     fun find(username: String): Optional<Audience> {
         return em.createQuery("SELECT a FROM Audience a WHERE a.username = :username", Audience::class.java)
             .setParameter("username", username)
-            .resultList.stream().findAny();
+            .resultList.stream().findAny()
     }
 }

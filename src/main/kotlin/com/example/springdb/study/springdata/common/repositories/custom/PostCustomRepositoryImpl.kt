@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class PostCustomRepositoryImpl(
     private val entityManager: EntityManager
-) : PostCustomRepository{
+) : PostCustomRepository {
     override fun findAllPost(): List<Post> {
         return entityManager.createQuery("SELECT p FROM Post p", Post::class.java).resultList
     }

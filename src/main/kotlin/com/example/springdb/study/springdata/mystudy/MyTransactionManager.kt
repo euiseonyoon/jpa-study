@@ -6,12 +6,12 @@ import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.SimpleTransactionStatus
 
-class MyTransactionManager: PlatformTransactionManager {
+class MyTransactionManager : PlatformTransactionManager {
     private val log = logger()
 
     override fun getTransaction(definition: TransactionDefinition?): TransactionStatus {
         log.info("[MyTransactionManager] getTransaction")
-        return  SimpleTransactionStatus()
+        return SimpleTransactionStatus()
     }
 
     override fun commit(status: TransactionStatus) {

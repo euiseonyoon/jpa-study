@@ -4,8 +4,7 @@ import com.example.springdb.study.springdata.common.repositories.customgeneral.M
 import org.springframework.data.querydsl.QuerydslPredicateExecutor
 
 // QueryDsl
-interface Post2Repository: MyRepository<Post2, Long>, QuerydslPredicateExecutor<Post2> {
-}
+interface Post2Repository : MyRepository<Post2, Long>, QuerydslPredicateExecutor<Post2>
 
 /*
 NOTE: 예전에는 위처럼 사용하면 안되었다. 이유는

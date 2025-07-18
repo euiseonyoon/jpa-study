@@ -15,7 +15,6 @@ interface Store2Repository : JpaRepository<Store2, Long>, JpaSpecificationExecut
     @EntityGraph(value = "Store2.withProducts", type = EntityGraph.EntityGraphType.FETCH)
     override fun findAll(): List<Store2>
 
-
     /**
      *
      *     @EntityGraph(value = "Store2.withProducts", type = EntityGraph.EntityGraphType.LOAD)

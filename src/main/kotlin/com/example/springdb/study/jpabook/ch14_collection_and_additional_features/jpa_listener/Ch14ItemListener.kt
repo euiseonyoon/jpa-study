@@ -10,7 +10,6 @@ import jakarta.persistence.PrePersist
 import jakarta.persistence.PreRemove
 import jakarta.persistence.PreUpdate
 
-
 class Ch14ItemListener {
     private val log = logger()
 

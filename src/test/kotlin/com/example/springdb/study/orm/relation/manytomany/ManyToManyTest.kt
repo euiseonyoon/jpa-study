@@ -20,15 +20,14 @@ class ManyToManyTest {
         session.persist(worker)
         val roles = listOf(
             Role(name = "ADMIN"),
-            Role(name = "USER"),
+            Role(name = "USER")
         ).also { it ->
-            it.forEach {session.persist(it)}
+            it.forEach { session.persist(it) }
         }
         session.flush()
 
         val workerRoles = WorkerRole.addWorker(worker, roles)
-        workerRoles.forEach {session.persist(it)}
+        workerRoles.forEach { session.persist(it) }
         session.flush()
     }
-
 }

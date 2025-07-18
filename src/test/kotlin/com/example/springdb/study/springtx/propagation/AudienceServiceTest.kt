@@ -1,12 +1,12 @@
 package com.example.springdb.study.springtx.propagation
 
 import com.example.springdb.study.logger
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.UnexpectedRollbackException
+import kotlin.test.assertTrue
 
 @SpringBootTest
 class AudienceServiceTest {
@@ -15,11 +15,12 @@ class AudienceServiceTest {
 
     @Autowired
     lateinit var audienceService: AudienceService
+
     @Autowired
     lateinit var audienceRepository: AudienceRepository
+
     @Autowired
     lateinit var logRepository: LogRepository
-
 
     /**
      * audienceService       @Transactional: OFF
@@ -50,7 +51,7 @@ class AudienceServiceTest {
         val username = "로그예외_outerTxOff_fail"
 
         // WHEN
-        assertThrows<RuntimeException>{
+        assertThrows<RuntimeException> {
             audienceService.joinV1(username)
         }
 
@@ -88,7 +89,7 @@ class AudienceServiceTest {
         val username = "로그예외_outerTxOn_fail"
 
         // WHEN
-        assertThrows<RuntimeException>{
+        assertThrows<RuntimeException> {
             audienceService.joinV1(username)
         }
 
@@ -129,7 +130,7 @@ class AudienceServiceTest {
         val username = "로그예외_recoverException_fail"
 
         // WHEN
-        assertThrows<UnexpectedRollbackException>{
+        assertThrows<UnexpectedRollbackException> {
             audienceService.joinV2(username)
         }
 
@@ -139,10 +140,10 @@ class AudienceServiceTest {
     }
 
     /**
-    * audienceService       @Transactional: ON
-    * audienceRepository    @Transactional: ON
-    * logRepository         @Transactional: ON (propagation=REQUIRES_NEW). Exception 여기서 발생
-    * */
+     * audienceService       @Transactional: ON
+     * audienceRepository    @Transactional: ON
+     * logRepository         @Transactional: ON (propagation=REQUIRES_NEW). Exception 여기서 발생
+     * */
     @Test
     fun recoverException_success_requires_new() {
         // GIVEN
@@ -155,5 +156,4 @@ class AudienceServiceTest {
         assertTrue { audienceRepository.find(username).isPresent }
         assertTrue { logRepository.find(username).isEmpty }
     }
-
 }

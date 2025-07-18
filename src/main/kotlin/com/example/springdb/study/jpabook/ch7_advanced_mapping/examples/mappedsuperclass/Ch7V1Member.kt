@@ -12,7 +12,7 @@ import jakarta.persistence.Entity
  * 컬럼들: `member_id`, `name`, `email`
  * */
 @Entity
-@AttributeOverride(name="id", column = Column(name="member_id"))
+@AttributeOverride(name = "id", column = Column(name = "member_id"))
 class Ch7V1Member : Ch7V1BaseEntity() {
     // id, name을 상속
     var email: String? = null

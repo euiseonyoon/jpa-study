@@ -8,7 +8,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.MapsId
 
 @Entity
-class WorkerRole{
+class WorkerRole {
     @EmbeddedId
     var workerRoleId: WorkerRoleId = WorkerRoleId()
 
@@ -27,10 +27,10 @@ class WorkerRole{
         requireNotNull(role.id) { "Role must have an ID (persisted entity)" }
 
         this.workerRoleId = WorkerRoleId(worker.id!!, role.id!!)
-        if(this.worker != worker) {
+        if (this.worker != worker) {
             this.worker = worker
         }
-        if(this.role != role) {
+        if (this.role != role) {
             this.role = role
         }
 

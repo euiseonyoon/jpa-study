@@ -9,7 +9,7 @@ import java.time.Clock
 import java.time.LocalDateTime
 
 @Entity
-class Post2{
+class Post2 {
 
     @Id @Generated
     val id: Long = 0
@@ -29,4 +29,3 @@ class Post2{
         this.comments.add(comment)
     }
 }
-

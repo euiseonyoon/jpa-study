@@ -8,7 +8,7 @@ import jakarta.persistence.Table
 @Entity
 @Table(name = "orders")
 class Order(
-    var processCase: String, // 정상, 예외, 잔고부족
+    var processCase: String // 정상, 예외, 잔고부족
 ) {
     @Id
     @GeneratedValue

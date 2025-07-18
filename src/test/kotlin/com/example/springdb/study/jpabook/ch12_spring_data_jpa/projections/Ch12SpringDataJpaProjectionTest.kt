@@ -70,7 +70,7 @@ class Ch12SpringDataJpaProjectionTest {
         return orderRepository.save(order)
     }
 
-    private fun generateItemInfo(min: Int, max: Int, itemCount: Int):  List<Triple<String, Int, Int>> {
+    private fun generateItemInfo(min: Int, max: Int, itemCount: Int): List<Triple<String, Int, Int>> {
         return (0 until itemCount).map { it ->
             val price = (min..max).random()
             val stock = (1..20).random()

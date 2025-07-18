@@ -17,13 +17,13 @@ import jakarta.persistence.OneToMany
 class Store(
     @Id @GeneratedValue
     val id: Long? = null,
-    val name : String,
+    val name: String
 ) {
     @OneToMany(mappedBy = "store")
     private val products: MutableSet<Product> = mutableSetOf()
 
     val productList: List<Product>
-            get() = products.toList()
+        get() = products.toList()
 
     fun addProduct(product: Product) {
         this.products.add(product)

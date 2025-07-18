@@ -5,7 +5,6 @@ interface CommentProjection {
     val dislikes: Int
 }
 
-
 data class CommentDto(
     val likes: Int,
     val dislikes: Int

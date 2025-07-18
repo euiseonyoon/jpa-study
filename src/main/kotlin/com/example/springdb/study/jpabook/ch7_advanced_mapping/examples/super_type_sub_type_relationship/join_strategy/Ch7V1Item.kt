@@ -23,7 +23,7 @@ import jakarta.persistence.InheritanceType
  * */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name= "DTYPE")
+@DiscriminatorColumn(name = "DTYPE")
 abstract class Ch7V1Item {
     @Id @GeneratedValue
     val id: Long? = null

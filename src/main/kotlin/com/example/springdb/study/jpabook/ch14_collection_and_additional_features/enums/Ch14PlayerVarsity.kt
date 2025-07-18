@@ -2,5 +2,5 @@ package com.example.springdb.study.jpabook.ch14_collection_and_additional_featur
 
 enum class Ch14PlayerVarsity {
     VARSITY,
-    JUNIOR_VARSITY,
+    JUNIOR_VARSITY
 }

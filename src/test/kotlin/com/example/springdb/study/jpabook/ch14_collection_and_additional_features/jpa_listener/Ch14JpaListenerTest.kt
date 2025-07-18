@@ -19,19 +19,17 @@ class Ch14JpaListenerTest {
     @Autowired
     lateinit var itemRepository: Ch14ItemRepository
 
-
     var items: List<Ch14Item> = listOf()
 
     @BeforeTest
     fun init() {
         items = initItems()
 
-
         em.flush()
         em.clear()
     }
 
-    private fun generateItemInfo(min: Int, max: Int, itemCount: Int):  List<Triple<String, Int, Int>> {
+    private fun generateItemInfo(min: Int, max: Int, itemCount: Int): List<Triple<String, Int, Int>> {
         return (0 until itemCount).map { it ->
             val price = (min..max).random()
             val stock = (1..20).random()
@@ -45,7 +43,6 @@ class Ch14JpaListenerTest {
             itemRepository.save(Ch14Item(name, price, stock))
         }
     }
-
 
     @Test
     fun test() {
@@ -93,5 +90,4 @@ class Ch14JpaListenerTest {
          *      merge()가 PrePersist를 발생시키는건, 새로운 엔티티를 merge() 할때!!
          * */
     }
-
 }

@@ -30,4 +30,3 @@ class Ch7Member : RegisterUpdateBaseEntity {
         this.address = address
     }
 }
-

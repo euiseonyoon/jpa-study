@@ -42,5 +42,3 @@ class WorkerRoleId : Serializable {
         return result
     }
 }
-
-

@@ -17,7 +17,7 @@ import jakarta.persistence.OneToMany
 class Store2(
     @Id @GeneratedValue
     val id: Long? = null,
-    val name : String,
+    val name: String
 ) {
     @OneToMany(mappedBy = "store")
     private val products: MutableSet<Product2> = mutableSetOf()

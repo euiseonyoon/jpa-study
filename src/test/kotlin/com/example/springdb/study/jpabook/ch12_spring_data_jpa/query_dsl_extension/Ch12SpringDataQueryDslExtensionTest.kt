@@ -15,6 +15,7 @@ class Ch12SpringDataQueryDslExtensionTest {
 
     @Autowired
     lateinit var itemRepository: Ch12ItemRepository
+
     @Autowired
     @PersistenceContext
     lateinit var em: EntityManager
@@ -30,7 +31,7 @@ class Ch12SpringDataQueryDslExtensionTest {
         em.clear()
     }
 
-    private fun generateItemInfo(min: Int, max: Int, itemCount: Int):  List<Triple<String, Int, Int>> {
+    private fun generateItemInfo(min: Int, max: Int, itemCount: Int): List<Triple<String, Int, Int>> {
         return (0 until itemCount).map { it ->
             val price = (min..max).random()
             val stock = (1..20).random()

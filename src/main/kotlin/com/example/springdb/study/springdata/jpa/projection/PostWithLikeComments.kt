@@ -11,7 +11,7 @@ class PostWithLikeComments(
     val id: Long? = null,
 
     val title: String,
-    val content: String,
+    val content: String
 ) {
     @OneToMany(mappedBy = "post")
     private val comments: MutableSet<CommentWithLikes> = mutableSetOf()

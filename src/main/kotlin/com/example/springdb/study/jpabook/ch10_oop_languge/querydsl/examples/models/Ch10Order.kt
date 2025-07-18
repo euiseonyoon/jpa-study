@@ -22,7 +22,7 @@ class Ch10Order {
 
     fun assignMember(member: Ch10Member) {
         this.member = member
-        if ( !member.orders.contains(this) ){
+        if (!member.orders.contains(this)) {
             member.orders.add(this)
         }
     }

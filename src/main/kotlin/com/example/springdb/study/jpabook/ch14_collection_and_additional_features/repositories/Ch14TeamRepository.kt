@@ -10,5 +10,5 @@ interface Ch14TeamRepository : JpaRepository<Ch14Team, Long> {
 
     @EntityGraph(value = "Ch14Team.withPlayers", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT t FROM Ch14Team t WHERE t.id = :id")
-    fun searchByTeamIdAndAllPlayers(@Param("id") id: Long) : Ch14Team
+    fun searchByTeamIdAndAllPlayers(@Param("id") id: Long): Ch14Team
 }

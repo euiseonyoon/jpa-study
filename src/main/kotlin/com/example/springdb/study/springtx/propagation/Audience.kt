@@ -6,7 +6,7 @@ import jakarta.persistence.Id
 
 @Entity
 class Audience(
-    var username: String,
+    var username: String
 ) {
     @Id @GeneratedValue
     val id: Long? = null

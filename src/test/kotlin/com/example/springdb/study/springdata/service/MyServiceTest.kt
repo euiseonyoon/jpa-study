@@ -35,11 +35,13 @@ class MyServiceTest {
     lateinit var rockRepository: RockRepository
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         1. @Transactional이 붙지 않은 @Service가 과연 proxy인지 확인
         2. JpaRepository를 이어받은 RockRepository(interface)는 proxy 인지 확인
         3. 2번에서 RockRepository가 proxy라면, 어떤 proxy인지 확인 (JDK 동적 proxy || CGLIB 프록시)
-    """)
+    """
+    )
     fun test1() {
         val isPlainServiceProxy = AopUtils.isAopProxy(myPlainService)
         val isRepoProxy = AopUtils.isAopProxy(rockRepository)
@@ -60,11 +62,13 @@ class MyServiceTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         1. @Transactional이 붙은 @Service가 과연 proxy인지 확인
         2. 만약 1번에서 proxy로 확인된다면, 어떤 프로시인지 확인
-    """)
-    fun test2(){
+    """
+    )
+    fun test2() {
         val isTransactionalServiceProxy = AopUtils.isAopProxy(myServiceWithTransactional)
         val isJdkProxy = AopUtils.isJdkDynamicProxy(myServiceWithTransactional)
         val isCglibProxy = AopUtils.isCglibProxy(myServiceWithTransactional)
@@ -84,14 +88,16 @@ class MyServiceTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         @Service가 @Transactional로 인해 proxy화 되어도, 
         프록시 내부 호출 문제로 인해, 외부 서비스로 분리를 해야하는 경우가 있다.
         이러한 과정중 어디어디가 proxy인지 확인해 본다.
         
         request flow:
             @Service with @Transactional -> 중간 다른 @Service without @Transactional -> RockRepository
-    """)
+    """
+    )
     fun test3() {
         val middleService = myServiceWithTransactionalUsingOtherService.myMiddleService
 
@@ -127,15 +133,17 @@ class MyServiceTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         여러 Rock을 save 한다. 하지만 의도적으로 마지막 rock을 save할때 무게를 음수처리하여 DB 오류를 발생시킨다.
         목적: MiddleService는 proxy가 아닌데, 과연 트렌젝션 보장이 되는가? 
-    """)
+    """
+    )
     fun test4_1() {
         val rockInfo = mapOf<String, Int>(
             "rockName10" to 10,
             "rockName11" to 11,
-            "rockName12" to -1,
+            "rockName12" to -1
         )
         myServiceWithTransactionalUsingOtherService.saveRocks(rockInfo)
 

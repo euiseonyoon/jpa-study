@@ -56,12 +56,16 @@ class Ch10QueryDslTest {
     @Autowired
     @PersistenceContext
     lateinit var em: EntityManager
+
     @Autowired
     lateinit var memberRepository: Ch10MemberRepository
+
     @Autowired
     lateinit var itemRepository: Ch10ItemRepository
+
     @Autowired
     lateinit var orderRepository: Ch10OrderRepository
+
     @Autowired
     lateinit var orderItemRepository: Ch10OrderItemRepository
 
@@ -105,7 +109,7 @@ class Ch10QueryDslTest {
         }
     }
 
-    private fun generateItemInfo(min: Int, max: Int, itemCount: Int):  List<Triple<String, Int, Int>> {
+    private fun generateItemInfo(min: Int, max: Int, itemCount: Int): List<Triple<String, Int, Int>> {
         return (0 until itemCount).map { it ->
             val price = (min..max).random()
             val stock = (MIN_STOCK_QUANTITY..20).random()
@@ -250,6 +254,7 @@ class Ch10QueryDslTest {
             .groupBy(item.price) // price로 그룹
             .having(item.price.goe(PRICE_CRITERIA)) // 그룹 기준(price)가 PRICE_CRITERIA 보다 크거나 같음
             .fetch()
+
         /**
          * JPQL:
          *
@@ -341,6 +346,7 @@ class Ch10QueryDslTest {
             .join(order.member, member)
             .leftJoin(order.orderItems, orderItem)
             .fetch()
+
         /**
          * JPQL:
          *
@@ -528,14 +534,16 @@ class Ch10QueryDslTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         from에 여러 엔티티를 넣어서 세타조인(theta join)을 한다.
         세타조인: A theta join, also known as a conditional join, is a join operation in relational algebra 
                 that combines tuples from two or more tables based on a specified condition
                 
         * 사실 아래의 예시는 더 디테일하게 말하면 equijoin이다.
           세타조인은 이퀴조인을 포함한다.  (집합에서 꽃과 해바라기 처럼 ㅎㅎㅎ)
-    """)
+    """
+    )
     fun join_theta_join() {
         // GIVEN
         makeOrder(members.random(), listOf(items.random()))
@@ -582,7 +590,7 @@ class Ch10QueryDslTest {
         val maxPriceSubQuery = JPAExpressions
             .select(itemSub.price.max())
             .from(itemSub)
-            // 책에 나와있는 unique()는 QueryDsl 5.X 이후로 없어짐
+        // 책에 나와있는 unique()는 QueryDsl 5.X 이후로 없어짐
 
         val result = query.from(item)
             .where(item.price.eq(maxPriceSubQuery))
@@ -666,7 +674,7 @@ class Ch10QueryDslTest {
             .from(itemSubQuery)
             .where(itemSubQuery.stockQuantity.goe(MIN_STOCK_QUANTITY))
 
-        val result1 =query.from(orderItem)
+        val result1 = query.from(orderItem)
             .where(
                 orderItem.order.member.eq(memberNameEndsWith)
                     .and(orderItem.item.`in`(enoughStockItems))
@@ -727,11 +735,12 @@ class Ch10QueryDslTest {
          * */
     }
 
-
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         프로젝션의 대상이 하나면, 해당 타입으로 반환한다. ( 아래는 프로젝션의 대상이 Ch10Item.name(String) )
-    """)
+    """
+    )
     fun projection_simple() {
         val query = JPAQueryFactory(em)
 
@@ -980,10 +989,12 @@ class Ch10QueryDslTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         아래 벌크 연산은 queryDsl을 사용하나, JPQL을 사용하나 모두 적용된다.
         논점인 `영속성 관리` 측면에서 보자.
-    """)
+    """
+    )
     fun bulk_process() {
         // GIVEN
         val item = QCh10Item.ch10Item
@@ -1018,7 +1029,7 @@ class Ch10QueryDslTest {
         val id = items.random().id
 
         var emFindResult = em.find(Ch10Item::class.java, id) // SELECT 쿼리 실행
-        emFindResult =  em.find(Ch10Item::class.java, id) // SELECT 쿼리 미발생
+        emFindResult = em.find(Ch10Item::class.java, id) // SELECT 쿼리 미발생
         assertTrue { em.contains(emFindResult) }
 
         em.clear()
@@ -1092,6 +1103,7 @@ class Ch10QueryDslTest {
         //  em.flush()를 하지 않고 진행
         // 여기서 일반적으로 em.find(Ch10Item::class.java, id)를 하면 price=99999999가 DB에 적용되지 않는다.
         val second = em.find(Ch10Item::class.java, id)
+
         /**
          * second == item (영속성 컨텍스트에서 가져오기 때문에 가격은 둘다 99999999)
          *

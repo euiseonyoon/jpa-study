@@ -7,7 +7,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 
-
 /**
  * 생성 테이블 개수: 1개 (통합 단일 테이블)
  *
@@ -24,7 +23,7 @@ import jakarta.persistence.InheritanceType
  * */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name= "DTYPE")
+@DiscriminatorColumn(name = "DTYPE")
 abstract class Ch7V2Item {
     @Id @GeneratedValue
     val id: Long? = null

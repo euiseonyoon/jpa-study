@@ -1,9 +1,5 @@
 package com.example.springdb.study.springdata.jpa.projection
 
-import com.example.springdb.study.springdata.jpa.projection.CommentWithLikes
-import com.example.springdb.study.springdata.jpa.projection.CommentWithLikesRepository
-import com.example.springdb.study.springdata.jpa.projection.PostWithLikeComments
-import com.example.springdb.study.springdata.jpa.projection.PostWithLikeCommentsRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.Test
@@ -25,7 +21,6 @@ class ProjectionTest {
 
     @Test
     fun test() {
-
         val post = PostWithLikeComments(title = "title", content = "this is content")
         val savedPost = posts.save(post)
         val comment = CommentWithLikes(content = "this is good post")

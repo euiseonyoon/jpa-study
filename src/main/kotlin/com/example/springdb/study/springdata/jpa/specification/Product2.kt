@@ -13,9 +13,8 @@ class Product2(
     val name: String,
     val price: Int,
 
-    @ManyToOne(fetch = FetchType.LAZY)
     // Store2에 EntityGraph사용 말고,
     // 여기서 @Batchsize 넣는것도 1+N 을 최소화 하는데 도움이 된다.
+    @ManyToOne(fetch = FetchType.LAZY)
     val store: Store2
-) {
-}
+)

@@ -36,7 +36,6 @@ class Ch12SpringDataQueryMethodTest {
             addMemer(it)
         }
 
-
         em.flush()
         em.clear()
     }
@@ -90,5 +89,4 @@ class Ch12SpringDataQueryMethodTest {
             assertTony(it)
         }
     }
-
 }

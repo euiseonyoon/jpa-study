@@ -1,9 +1,5 @@
 package com.example.springdb.study.springdata.jpa.entityGraph
 
-import com.example.springdb.study.springdata.jpa.entityGraph.Product
-import com.example.springdb.study.springdata.jpa.entityGraph.ProductRepository
-import com.example.springdb.study.springdata.jpa.entityGraph.Store
-import com.example.springdb.study.springdata.jpa.entityGraph.StoreRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.Test
@@ -19,6 +15,7 @@ class EntityGraphTest {
 
     @Autowired
     lateinit var productRepository: ProductRepository
+
     @Autowired
     lateinit var storeRepository: StoreRepository
 

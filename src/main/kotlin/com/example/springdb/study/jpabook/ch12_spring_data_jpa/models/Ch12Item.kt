@@ -22,7 +22,7 @@ import jakarta.persistence.SqlResultSetMapping
                 // name은 db의 컬럼명과 동일해야 함.
                 ColumnResult(name = "price", type = Int::class),
                 ColumnResult(name = "name", type = String::class),
-                ColumnResult(name = "stock_quantity", type = Int::class),
+                ColumnResult(name = "stock_quantity", type = Int::class)
             ]
         )
     ]

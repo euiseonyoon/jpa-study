@@ -8,7 +8,7 @@ import java.io.Serializable
 // NOTE: 이거 중요!!  다른 Repository에서 사용될 중간 Repository에는 @NoRepositoryBean를 꼭 넣는다
 // e.g.). AccountRepository - MyRepository(중간) - JpaRepository
 @NoRepositoryBean
-interface MyRepository<T, ID : Serializable>: JpaRepository<T, ID> {
+interface MyRepository<T, ID : Serializable> : JpaRepository<T, ID> {
 
     // persistent context에 있는지 여부
     fun contains(entity: T): Boolean

@@ -19,8 +19,10 @@ class Ch14AdditionalFeaturesTest {
     @Autowired
     @PersistenceContext
     lateinit var em: EntityManager
+
     @Autowired
     lateinit var playerRepository: Ch14PlayerRepository
+
     @Autowired
     lateinit var teamRepository: Ch14TeamRepository
 
@@ -86,6 +88,7 @@ class Ch14AdditionalFeaturesTest {
         // WHEN
         // salary desc, id asc
         val result = teamRepository.searchByTeamIdAndAllPlayers(team!!.id!!)
+
         /**
          *    select
          *         ct1_0.id,
@@ -139,5 +142,4 @@ class Ch14AdditionalFeaturesTest {
             }
         }
     }
-
 }

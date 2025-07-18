@@ -12,14 +12,15 @@ class MyTransactionManagerTest {
 
     private val log = logger()
 
-
     @Autowired
     lateinit var myTransactionManagerService: MyTransactionManagerService
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         @Transactional이라는 어노테이션은 단순 DB 트렌젝션을 보장하기 위함은 아니다.
-    """)
+    """
+    )
     fun test1() {
         myTransactionManagerService.customTxManager()
 

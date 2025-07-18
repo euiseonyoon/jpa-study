@@ -1,10 +1,5 @@
 package com.example.springdb.study.springdata.jpa.specification
 
-import com.example.springdb.study.springdata.jpa.specification.Product2
-import com.example.springdb.study.springdata.jpa.specification.Product2Repository
-import com.example.springdb.study.springdata.jpa.specification.Store2
-import com.example.springdb.study.springdata.jpa.specification.Store2Repository
-import com.example.springdb.study.springdata.jpa.specification.Store2Specs
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.Test
@@ -47,7 +42,6 @@ class SpecificationTest {
 
     @Test
     fun test() {
-
         addStoreAndProduct()
 
         val allStores = store2Repository.findAll()

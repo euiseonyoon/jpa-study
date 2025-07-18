@@ -225,5 +225,4 @@ class Ch7AdvancedMappingTest {
         // 아래에서 쿼리 발생하지 않았다.
         val madeDelivery = firstOrderItem.order?.delivery
     }
-
 }

@@ -66,7 +66,7 @@ class Ch14Order {
 
     fun assignMember(member: Ch14Member) {
         this.member = member
-        if ( !member.orders.contains(this) ){
+        if (!member.orders.contains(this)) {
             member.orders.add(this)
         }
     }

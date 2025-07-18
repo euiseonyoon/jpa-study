@@ -34,7 +34,7 @@ class MyServiceInnerCallTest3 {
         val rockInfo = mapOf<String, Int>(
             "rockName100" to 100,
             "rockName110" to 110,
-            "rockName120" to -1,
+            "rockName120" to -1
         )
         assertThrows<DataIntegrityViolationException> {
             myServiceWithTransactional.saveRocksWithRequiresNewPropagation(rockInfo)
@@ -72,7 +72,7 @@ class MyServiceInnerCallTest3 {
         val rockInfo = mapOf<String, Int>(
             "rockName100" to 100,
             "rockName110" to 110,
-            "rockName120" to -1,
+            "rockName120" to -1
         )
         assertThrows<DataIntegrityViolationException> {
             myServiceWithTransactionalUsingOtherService.saveRocksWithRequiresNewPropagation(rockInfo)
@@ -122,7 +122,7 @@ class MyServiceInnerCallTest3 {
         val rockInfo = mapOf<String, Int>(
             "rockName100" to 100,
             "rockName110" to 110,
-            "rockName120" to -1,
+            "rockName120" to -1
         )
         assertThrows<DataIntegrityViolationException> {
             myServiceWithTransactional.saveRocksWithRequiresNewPropagationObjectProvider(rockInfo)

@@ -18,4 +18,3 @@ class Ch14Delivery {
     @OneToOne(mappedBy = "delivery")
     var order: Ch14Order? = null
 }
-

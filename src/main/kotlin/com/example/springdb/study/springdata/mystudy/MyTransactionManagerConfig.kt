@@ -10,7 +10,7 @@ import org.springframework.transaction.PlatformTransactionManager
 @Configuration
 class MyTransactionManagerConfig {
 
-    @Bean(name= ["myTransactionManager"])
+    @Bean(name = ["myTransactionManager"])
     fun myTransactionManager(): PlatformTransactionManager = MyTransactionManager()
 
     @Bean

@@ -11,7 +11,7 @@ import jakarta.persistence.OneToMany
 
 @Entity
 @NamedQuery(
-    name= "Ch12Member.searchByUsername",
+    name = "Ch12Member.searchByUsername",
     query = "SELECT m FROM Ch12Member m WHERE m.name=:username"
 )
 class Ch12Member {

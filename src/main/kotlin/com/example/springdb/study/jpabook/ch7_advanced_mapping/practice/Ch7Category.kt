@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 
 @Entity
-class Ch7Category : RegisterUpdateBaseEntity(){
+class Ch7Category : RegisterUpdateBaseEntity() {
     @Id @GeneratedValue
     val id: Long? = null
 
@@ -25,9 +25,10 @@ class Ch7Category : RegisterUpdateBaseEntity(){
     var child: MutableSet<Ch7Category> = mutableSetOf()
 
     @ManyToMany
-    @JoinTable(name = "category_item",
-        joinColumns = [JoinColumn(name= "category_id", nullable = false)],
-        inverseJoinColumns = [JoinColumn(name= "item_id", nullable = false)]
+    @JoinTable(
+        name = "category_item",
+        joinColumns = [JoinColumn(name = "category_id", nullable = false)],
+        inverseJoinColumns = [JoinColumn(name = "item_id", nullable = false)]
     )
     var items: MutableSet<Ch7Item> = mutableSetOf()
 
@@ -45,4 +46,3 @@ class Ch7Category : RegisterUpdateBaseEntity(){
         }
     }
 }
-

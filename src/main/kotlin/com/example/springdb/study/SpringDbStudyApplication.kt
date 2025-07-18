@@ -11,5 +11,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 class SpringDbStudyApplication
 
 fun main(args: Array<String>) {
-	runApplication<SpringDbStudyApplication>(*args)
+    runApplication<SpringDbStudyApplication>(*args)
 }

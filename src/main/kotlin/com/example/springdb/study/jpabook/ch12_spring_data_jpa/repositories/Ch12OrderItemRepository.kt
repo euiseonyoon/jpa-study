@@ -7,15 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-interface Ch12OrderItemRepository: JpaRepository<Ch12OrderItem, Long> {
+interface Ch12OrderItemRepository : JpaRepository<Ch12OrderItem, Long> {
 
     fun findByCount(count: Int): List<Ch12NestedOrderItemInterface>
 
     @Query("SELECT oi FROM Ch12OrderItem oi WHERE oi.count = :count")
     fun searchByCountToNestedInterface(@Param("count") count: Int): List<Ch12NestedOrderItemInterface>
 
-
-    @Query("""
+    @Query(
+        """
         SELECT
             new com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12NestedOrderItemDto(
                 oi.count,
@@ -24,6 +24,7 @@ interface Ch12OrderItemRepository: JpaRepository<Ch12OrderItem, Long> {
             )
         FROM Ch12OrderItem oi
         WHERE oi.count = :count
-    """)
+    """
+    )
     fun searchByCountToNestedDto(@Param("count") count: Int): List<Ch12NestedOrderItemDto>
 }

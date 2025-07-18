@@ -31,7 +31,7 @@ class MyServiceInnerCallTest {
         val rockInfo = mapOf<String, Int>(
             "rockName100" to 100,
             "rockName110" to 110,
-            "rockName120" to -1,
+            "rockName120" to -1
         )
         myServiceWithTransactional.saveRocks(rockInfo)
         /**
@@ -48,9 +48,9 @@ class MyServiceInnerCallTest {
         val rockInfo = mapOf<String, Int>(
             "rockName100" to 100,
             "rockName110" to 110,
-            "rockName120" to -1,
+            "rockName120" to -1
         )
-        for((name, weight) in rockInfo) {
+        for ((name, weight) in rockInfo) {
             myServiceWithTransactionalUsingOtherService.saveRock(name, weight)
         }
         // 결과: 트렌젝션 미보장.. 이렇게 하면 rockName100, rockName110 저장, rockName120은 없음

@@ -10,7 +10,7 @@ class RollbackService {
 
     // 런타임 예외 발생: 롤백
     @Transactional()
-    fun runtimeException(){
+    fun runtimeException() {
         log.info("call runtimeException")
         throw RuntimeException()
     }

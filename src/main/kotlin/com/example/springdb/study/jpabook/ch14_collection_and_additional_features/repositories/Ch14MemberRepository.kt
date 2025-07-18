@@ -3,5 +3,4 @@ package com.example.springdb.study.jpabook.ch14_collection_and_additional_featur
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Member
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface Ch14MemberRepository : JpaRepository<Ch14Member, Long> {
-}
+interface Ch14MemberRepository : JpaRepository<Ch14Member, Long>

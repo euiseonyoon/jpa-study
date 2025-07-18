@@ -9,7 +9,5 @@ class Rock(
     @Id @GeneratedValue
     val id: Long? = null,
     val name: String,
-    val weightKgs: Int,
-) {
-
-}
+    val weightKgs: Int
+)

@@ -3,14 +3,12 @@ package com.example.springdb.study.jpabook.ch14_collection_and_additional_featur
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.NamedAttributeNode
 import jakarta.persistence.NamedEntityGraph
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
-import org.springframework.data.jpa.repository.EntityGraph
 
 @NamedEntityGraph(
     name = "Ch14Team.withPlayers",
@@ -28,7 +26,7 @@ class Ch14Team {
 
     // Ch14Player의 필드명 일치하게
     @OrderBy("salary desc, id asc")
-    @OneToMany (mappedBy = "team", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "team", cascade = [CascadeType.ALL], orphanRemoval = true)
     var players: MutableSet<Ch14Player> = mutableSetOf()
 
     constructor()

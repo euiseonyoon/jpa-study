@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable
 class Address {
     constructor()
 
-    constructor(city:String, zipCode: String, street: String) {
+    constructor(city: String, zipCode: String, street: String) {
         this.city = city
         this.street = street
         this.zipCode = zipCode
@@ -22,8 +22,8 @@ class Address {
 
         other as Address
         return city == other.city &&
-                zipCode == other.zipCode &&
-                street == other.street
+            zipCode == other.zipCode &&
+            street == other.street
     }
 
     override fun hashCode(): Int {

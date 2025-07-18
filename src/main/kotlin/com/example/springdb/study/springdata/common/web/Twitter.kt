@@ -12,5 +12,4 @@ class Twitter(
     val id: Long = 0,
     var title: String,
     val created: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
-) {
-}
+)

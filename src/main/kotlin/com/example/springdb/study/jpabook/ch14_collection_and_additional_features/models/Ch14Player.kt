@@ -22,7 +22,7 @@ import jakarta.persistence.SqlResultSetMapping
                 // 위의 Dto의 생성자의 param 순서와 동일 해야한다.
                 // name은 db의 컬럼명과 동일해야 함.
                 ColumnResult(name = "id", type = Long::class),
-                ColumnResult(name = "varsity_status", type = String::class),
+                ColumnResult(name = "varsity_status", type = String::class)
             ]
         )
     ]
@@ -46,7 +46,7 @@ class Ch14Player {
     var varsityStatus: Boolean = false
 
     constructor()
-    constructor(name: String, salary: Int){
+    constructor(name: String, salary: Int) {
         this.name = name
         this.salary = salary
     }

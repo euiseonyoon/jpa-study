@@ -29,6 +29,6 @@ class LogRepository(
     fun find(message: String): Optional<Log> {
         return em.createQuery("SELECT l FROM Log l WHERE l.message = :message", Log::class.java)
             .setParameter("message", message)
-            .resultList.stream().findAny();
+            .resultList.stream().findAny()
     }
 }

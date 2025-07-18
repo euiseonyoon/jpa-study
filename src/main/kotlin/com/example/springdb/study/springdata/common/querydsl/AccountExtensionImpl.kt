@@ -13,11 +13,11 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 
 // 이런식으로 fragment화 시켜서 lower 하게도 사용가능 하다.
 class AccountExtensionImpl(
-    private val entityManager: EntityManager,
+    private val entityManager: EntityManager
 ) : QuerydslRepositorySupport(Account::class.java), AccountExtension {
 
     // 그냥 val queryDsl 이라고 쓰면 QuerydslRepositorySupport 구현체의 getQuerydsl()과 함수 시그니쳐 충돌일어남
-    val querydslHelp : Querydsl by lazy {
+    val querydslHelp: Querydsl by lazy {
         val builder = PathBuilder(Account::class.java, "account")
         Querydsl(entityManager, builder)
     }
@@ -28,8 +28,8 @@ class AccountExtensionImpl(
 
         val query: JPQLQuery<Account> = from(account)
             .where(account.firstName.equalsIgnoreCase(partOfFirstName))
-            // .leftJoin<>()
-            // . 어쩌고 저쩌고
+        // .leftJoin<>()
+        // . 어쩌고 저쩌고
 
         val pageableQuery: JPQLQuery<Account> = querydslHelp.applyPagination(pageable, query)
         val results: QueryResults<Account> = pageableQuery.fetchResults()

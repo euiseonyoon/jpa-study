@@ -38,14 +38,15 @@ interface Ch12ItemRepository : JpaRepository<Ch12Item, Long>, Ch12ItemRepository
      *
      *  가능하면 표준을 따르도록 하자
      * */
-    @Query("""
+    @Query(
+        """
        SELECT 
        new com.example.springdb.study.jpabook.ch12_spring_data_jpa.projections.Ch12ItemNameOnlyDto(i.name)
        FROM Ch12Item i 
        WHERE i.name = :name 
-    """)
+    """
+    )
     fun searchByNameToDto(@Param("name") name: String): List<Ch12ItemNameOnlyDto>
-
 
     @NativeQuery(
         value = "SELECT * FROM ch12item WHERE ch12item.id = :id",
@@ -54,7 +55,7 @@ interface Ch12ItemRepository : JpaRepository<Ch12Item, Long>, Ch12ItemRepository
     fun searchByIdUsingNativeQueryToDto(@Param("id") id: Long): Ch12ItemNativeDto
 
     @NativeQuery(
-        value = "SELECT * FROM ch12item WHERE ch12item.id = :id",
+        value = "SELECT * FROM ch12item WHERE ch12item.id = :id"
     )
     fun searchByIdUsingNativeQueryToInterface(@Param("id") id: Long): Ch12ItemNativeInterfaceResult
 }

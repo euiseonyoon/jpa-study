@@ -24,10 +24,10 @@ class Ch6V1Category {
     var child: MutableSet<Ch6V1Category> = mutableSetOf()
 
     @ManyToMany
-    @JoinTable(name = "category_item",
-        joinColumns = [JoinColumn(name= "category_id", nullable = false)],
-        inverseJoinColumns = [JoinColumn(name= "item_id", nullable = false)]
+    @JoinTable(
+        name = "category_item",
+        joinColumns = [JoinColumn(name = "category_id", nullable = false)],
+        inverseJoinColumns = [JoinColumn(name = "item_id", nullable = false)]
     )
     var items: MutableSet<Ch6V1Item> = mutableSetOf()
 }
-

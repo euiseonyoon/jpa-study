@@ -6,7 +6,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 
-
 /**
  * 생성 테이블 개수: 자식 클래수의 수(N)
  *

@@ -17,10 +17,10 @@ class OrderService(
 
         log.info("결제 프로세스 시작")
 
-        if(order.processCase == "예외") {
+        if (order.processCase == "예외") {
             log.info("시스템 예외 발생")
             throw RuntimeException("시스템 예외 발생")
-        } else if(order.processCase == "잔고부족") {
+        } else if (order.processCase == "잔고부족") {
             log.info("잔고부족 비지니스 예외 발생")
             order.payStatus = "대기"
             throw NotEnoughMoneyException("잔고가 부족해요.")

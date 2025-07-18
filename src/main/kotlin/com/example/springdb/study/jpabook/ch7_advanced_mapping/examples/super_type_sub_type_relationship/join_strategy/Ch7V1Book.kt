@@ -6,7 +6,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
 @DiscriminatorValue("B")
-@PrimaryKeyJoinColumn(name= "book_id") // ID를 재정의 할 수 있다.
+@PrimaryKeyJoinColumn(name = "book_id") // ID를 재정의 할 수 있다.
 class Ch7V1Book : Ch7V1Item() {
     var author: String? = null
 }

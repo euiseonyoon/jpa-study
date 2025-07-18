@@ -23,4 +23,3 @@ class Ch6V1Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     var orders: MutableSet<Ch6V1Order> = mutableSetOf()
 }
-

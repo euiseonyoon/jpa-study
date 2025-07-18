@@ -42,4 +42,3 @@ class Ch6V1Order {
         }
     }
 }
-

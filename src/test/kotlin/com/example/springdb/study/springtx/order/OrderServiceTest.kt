@@ -1,15 +1,11 @@
 package com.example.springdb.study.springtx.order
 
 import com.example.springdb.study.logger
-import com.example.springdb.study.springtx.order.NotEnoughMoneyException
-import com.example.springdb.study.springtx.order.Order
-import com.example.springdb.study.springtx.order.OrderRepository
-import com.example.springdb.study.springtx.order.OrderService
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import kotlin.test.assertTrue
 
 @SpringBootTest
 class OrderServiceTest {
@@ -17,6 +13,7 @@ class OrderServiceTest {
 
     @Autowired
     lateinit var orderService: OrderService
+
     @Autowired
     lateinit var orderRepository: OrderRepository
 
@@ -38,7 +35,7 @@ class OrderServiceTest {
         // Given
         val order = Order(processCase = "예외")
 
-        assertThrows<RuntimeException>{
+        assertThrows<RuntimeException> {
             orderService.order(order)
         }
 

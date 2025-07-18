@@ -16,6 +16,6 @@ class Book {
     var bookStore: BookStore? = null
         set(value) {
             field = value
-            value?.addBook(this)  // ②
+            value?.addBook(this) // ②
         }
 }

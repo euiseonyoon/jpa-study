@@ -50,7 +50,7 @@ class QueryDslTest {
             and a1_0.last_name like ? escape '!'
         fetch
             first ? rows only
-        */
+         */
         // NOTE: 여기서 신기한걸 보았다.  첫
         // 첫번쨰? : "Luke" 대신 "luke"  (이건 뭐 case not sensitive로 hibernate가 치환했나보다)
         // 두번째? : "Yo" 그대로 잘 적용

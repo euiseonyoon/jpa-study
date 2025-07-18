@@ -22,4 +22,3 @@ class Ch7Delivery : RegisterUpdateBaseEntity() {
     @OneToOne(mappedBy = "delivery")
     var order: Ch7Order? = null
 }
-

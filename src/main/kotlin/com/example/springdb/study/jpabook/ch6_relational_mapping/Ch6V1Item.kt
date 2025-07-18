@@ -28,4 +28,3 @@ class Ch6V1Item {
     @ManyToMany(mappedBy = "items") // 그냥 양방향 커넥션의 주인을 카테고리로 정했다.
     var categories: MutableSet<Ch6V1Category> = mutableSetOf()
 }
-

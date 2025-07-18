@@ -17,7 +17,7 @@ class RollBackTest {
 
     @Test
     fun runtimeException() {
-        assertThrows<RuntimeException>{ service.runtimeException() }
+        assertThrows<RuntimeException> { service.runtimeException() }
         /**
          * LOG:
          *
@@ -36,7 +36,7 @@ class RollBackTest {
 
     @Test
     fun checkedException() {
-        assertThrows<MyException>{ service.checkedException() }
+        assertThrows<MyException> { service.checkedException() }
         /**
          * LOG:
          *
@@ -55,7 +55,7 @@ class RollBackTest {
 
     @Test
     fun rollbackFor() {
-        assertThrows<MyException>{ service.rollbackFor() }
+        assertThrows<MyException> { service.rollbackFor() }
 
         /**
          * LOG:

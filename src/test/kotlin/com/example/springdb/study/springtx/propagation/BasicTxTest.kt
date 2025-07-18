@@ -3,15 +3,12 @@ package com.example.springdb.study.springtx.propagation
 import com.example.springdb.study.logger
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
@@ -167,7 +164,7 @@ class BasicTxTest {
 
         log.info("내부 tx 시작")
         val inner = txManager.getTransaction(DefaultTransactionAttribute())
-        log.info("inner.isNewTransaction={}",inner.isNewTransaction)
+        log.info("inner.isNewTransaction={}", inner.isNewTransaction)
         log.info("내부 tx 커밋")
         txManager.commit(inner)
 

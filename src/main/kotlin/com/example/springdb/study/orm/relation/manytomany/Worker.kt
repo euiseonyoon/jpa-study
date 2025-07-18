@@ -8,7 +8,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Transient
 
 @Entity
-class Worker{
+class Worker {
     @Id @GeneratedValue
     val id: Long? = null
     var name: String? = null

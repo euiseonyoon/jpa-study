@@ -24,14 +24,14 @@ class MyServiceWithTransactional(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun saveRocksWithRequiresNewPropagation(rockInfo: Map<String, Int>) {
-        for((key, value) in rockInfo) {
+        for ((key, value) in rockInfo) {
             saveRockRequiresNew(key, value)
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun saveRocksWithRequiresNewPropagationObjectProvider(rockInfo: Map<String, Int>) {
-        for((key, value) in rockInfo) {
+        for ((key, value) in rockInfo) {
             objectProvider.`object`.saveRockRequiresNew(key, value)
         }
     }
@@ -61,10 +61,10 @@ class MyServiceWithTransactional(
     fun saveRocksInnerTransactional(rockInfo: Map<String, Int>) {
         val length = rockInfo.keys.size
 
-        for((index, entry) in rockInfo.entries.withIndex()) {
+        for ((index, entry) in rockInfo.entries.withIndex()) {
             val rockName = entry.key
             val rockWeight = entry.value
-            val newRock = Rock(name= rockName, weightKgs = rockWeight)
+            val newRock = Rock(name = rockName, weightKgs = rockWeight)
             rockRepository.save(newRock)
         }
     }
@@ -72,10 +72,10 @@ class MyServiceWithTransactional(
     fun saveRocksInnerNoTransactional(rockInfo: Map<String, Int>) {
         val length = rockInfo.keys.size
 
-        for((index, entry) in rockInfo.entries.withIndex()) {
+        for ((index, entry) in rockInfo.entries.withIndex()) {
             val rockName = entry.key
             val rockWeight = entry.value
-            val newRock = Rock(name= rockName, weightKgs = rockWeight)
+            val newRock = Rock(name = rockName, weightKgs = rockWeight)
             rockRepository.save(newRock)
         }
     }

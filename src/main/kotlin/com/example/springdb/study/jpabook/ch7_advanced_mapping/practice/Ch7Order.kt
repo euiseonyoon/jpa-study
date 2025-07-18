@@ -38,7 +38,7 @@ class Ch7Order : RegisterUpdateBaseEntity() {
 
     fun assignMember(member: Ch7Member) {
         this.member = member
-        if ( !member.orders.contains(this) ){
+        if (!member.orders.contains(this)) {
             member.orders.add(this)
         }
     }
@@ -65,4 +65,3 @@ class Ch7Order : RegisterUpdateBaseEntity() {
         }
     }
 }
-

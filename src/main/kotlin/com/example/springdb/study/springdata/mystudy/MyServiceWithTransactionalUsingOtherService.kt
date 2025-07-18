@@ -8,7 +8,7 @@ import kotlin.collections.iterator
 
 @Service
 class MyServiceWithTransactionalUsingOtherService(
-    val myMiddleService: MyMiddleService,
+    val myMiddleService: MyMiddleService
 ) {
     private val log = logger()
 
@@ -22,7 +22,7 @@ class MyServiceWithTransactionalUsingOtherService(
     fun saveRocks(rockInfo: Map<String, Int>) {
         val length = rockInfo.keys.size
 
-        for((index, entry) in rockInfo.entries.withIndex()) {
+        for ((index, entry) in rockInfo.entries.withIndex()) {
             val rockName = entry.key
             val rockWeight = entry.value
             myMiddleService.saveRockInTheMiddle(rockName, rockWeight)
@@ -31,7 +31,7 @@ class MyServiceWithTransactionalUsingOtherService(
 
     @Transactional
     fun saveRocksWithRequiresNewPropagation(rockInfo: Map<String, Int>) {
-        for((key, value) in rockInfo) {
+        for ((key, value) in rockInfo) {
             myMiddleService.saveRockRequiresNew(key, value)
         }
     }

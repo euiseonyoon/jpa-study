@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated
 @DiscriminatorValue("A")
 class Ch7Album : Ch7Item() {
     var artist: String? = null
+
     @Enumerated(EnumType.STRING)
     var genre: Ch7AlbumGenre? = null
 }

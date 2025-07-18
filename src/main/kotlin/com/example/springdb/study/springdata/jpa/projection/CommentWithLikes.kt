@@ -9,10 +9,11 @@ import jakarta.persistence.ManyToOne
 class CommentWithLikes(
     @Id @GeneratedValue
     val id: Long? = null,
-    val content: String,
+    val content: String
 ) {
     var likes: Int = 0
     var dislikes: Int = 0
+
     @ManyToOne()
     var post: PostWithLikeComments? = null
 }

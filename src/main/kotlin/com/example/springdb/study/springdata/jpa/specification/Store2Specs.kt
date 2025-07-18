@@ -12,10 +12,10 @@ class Store2Specs {
         fun nameEqualTo(name: String): Specification<Store2> {
             return object : Specification<Store2> {
                 /*
-                * org.springframework.data.jpa.domain.Specification
-                * @Nullable
+                 * org.springframework.data.jpa.domain.Specification
+                 * @Nullable
 	              Predicate toPredicate(Root<T> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder);
-                * */
+                 * */
                 override fun toPredicate(
                     root: Root<Store2>,
                     query: CriteriaQuery<*>?,

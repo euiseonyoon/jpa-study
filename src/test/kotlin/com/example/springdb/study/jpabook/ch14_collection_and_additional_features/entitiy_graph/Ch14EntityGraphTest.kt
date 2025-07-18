@@ -40,10 +40,13 @@ class Ch14EntityGraphTest {
     @Autowired
     @PersistenceContext
     lateinit var em: EntityManager
+
     @Autowired
     lateinit var memberRepository: Ch14MemberRepository
+
     @Autowired
     lateinit var orderRepository: Ch14OrderRepository
+
     @Autowired
     lateinit var itemRepository: Ch14ItemRepository
 
@@ -84,7 +87,7 @@ class Ch14EntityGraphTest {
         return orderRepository.save(order)
     }
 
-    private fun generateItemInfo(min: Int, max: Int, itemCount: Int):  List<Triple<String, Int, Int>> {
+    private fun generateItemInfo(min: Int, max: Int, itemCount: Int): List<Triple<String, Int, Int>> {
         return (0 until itemCount).map { it ->
             val price = (min..max).random()
             val stock = (1..20).random()
@@ -100,9 +103,11 @@ class Ch14EntityGraphTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         em.find()를 통해 JPA(Hibernate)를 직접 이용하여 엔티티 그래프를 사용하는 예시
-    """)
+    """
+    )
     fun entity_graph_jpa_hibernate_1() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -141,10 +146,12 @@ class Ch14EntityGraphTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         em.createQuery()를 통해 JPQL 쿼리를 만들고,
         JPA(Hibernate)를 직접 이용하여 엔티티 그래프를 사용하는 예시
-    """)
+    """
+    )
     fun entity_graph_jpa_hibernate_2() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -158,7 +165,7 @@ class Ch14EntityGraphTest {
             .setParameter("id", order.id)
             .setHint(
                 "javax.persistence.fetchgraph",
-                em.getEntityGraph("Ch14Order.withMember"),
+                em.getEntityGraph("Ch14Order.withMember")
             ).singleResult
         /**
          *        select
@@ -181,9 +188,11 @@ class Ch14EntityGraphTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Spring Data Jpa (JpaRepository)를 통해 엔티티 그래프를 사용하는 예제
-    """)
+    """
+    )
     fun entity_graph_spring_data_jpa() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -213,9 +222,9 @@ class Ch14EntityGraphTest {
         assertEquals(randomMember.id!!, result.member!!.id)
     }
 
-
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         JPA(Hibernate)를 직접 사용하여, EntityGraph + SubGraph를 사용하는 예시
         
         Ch14Order - Ch14OrderItem 까지는 Ch14Order 테이블이 관리한다
@@ -224,7 +233,8 @@ class Ch14EntityGraphTest {
         
         따라서, Ch14Order 조회로 Ch14Order - Ch14OrderItem - Ch14Item 까지의 데이터를 한번에 가져오려면
         EntityGraph(Ch14Order-Ch14OrderItem) + SubGraph(Ch14OrderItem-Ch14Item)을 같이 사용해야 한다.
-    """)
+    """
+    )
     fun entity_graph_and_sub_graph_jpa_hibernate() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -284,14 +294,16 @@ class Ch14EntityGraphTest {
         assertEquals(result.member!!.id, randomMember.id!!)
         assertEquals(
             randomItems.map { it.id!! }.toSet(),
-            result.orderItems.map{ it.item!!.id!! }.toSet()
+            result.orderItems.map { it.item!!.id!! }.toSet()
         )
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Spring Data Jpa (JpaRepository)를 사용하여, EntityGraph + SubGraph를 사용하는 예시
-    """)
+    """
+    )
     fun entity_graph_and_sub_graph_spring_data_jpa() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -336,14 +348,16 @@ class Ch14EntityGraphTest {
         assertEquals(result.member!!.id, randomMember.id!!)
         assertEquals(
             randomItems.map { it.id!! }.toSet(),
-            result.orderItems.map{ it.item!!.id!! }.toSet()
+            result.orderItems.map { it.item!!.id!! }.toSet()
         )
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         동적 EntityGraph
-    """)
+    """
+    )
     fun dynamic_entity_graph() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -383,9 +397,11 @@ class Ch14EntityGraphTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         동적 EntityGraph + SubGraph
-    """)
+    """
+    )
     fun dynamic_entity_graph_sub_graph() {
         // GIVEN
         val randomMember = members.shuffled().first()
@@ -446,8 +462,7 @@ class Ch14EntityGraphTest {
         assertEquals(result.delivery!!.id, delivery.id!!)
         assertEquals(
             randomItems.map { it.id!! }.toSet(),
-            result.orderItems.map{ it.item!!.id!! }.toSet()
+            result.orderItems.map { it.item!!.id!! }.toSet()
         )
     }
-
 }

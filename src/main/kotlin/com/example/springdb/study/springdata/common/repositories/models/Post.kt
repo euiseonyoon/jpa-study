@@ -38,4 +38,3 @@ class Post : AbstractAggregateRoot<Post>() {
         return this
     }
 }
-
