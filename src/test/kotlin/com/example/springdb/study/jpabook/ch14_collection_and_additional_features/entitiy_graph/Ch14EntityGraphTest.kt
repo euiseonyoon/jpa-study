@@ -1,8 +1,11 @@
 package com.example.springdb.study.jpabook.ch14_collection_and_additional_features.entitiy_graph
 
+import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Delivery
+import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14DeliveryStatus
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Item
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Member
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Order
+import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14OrderItem
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.repositories.Ch14ItemRepository
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.repositories.Ch14MemberRepository
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.repositories.Ch14OrderRepository
@@ -58,6 +61,12 @@ class Ch14EntityGraphTest {
 
         em.flush()
         em.clear()
+    }
+
+    private fun makeDelivery(): Ch14Delivery {
+        val delivery = Ch14Delivery()
+        delivery.status = Ch14DeliveryStatus.STARTED
+        return delivery
     }
 
     private fun addMemer(name: String): Ch14Member {
@@ -325,6 +334,116 @@ class Ch14EntityGraphTest {
 
         // THEN
         assertEquals(result.member!!.id, randomMember.id!!)
+        assertEquals(
+            randomItems.map { it.id!! }.toSet(),
+            result.orderItems.map{ it.item!!.id!! }.toSet()
+        )
+    }
+
+    @Test
+    @DisplayName("""
+        동적 EntityGraph
+    """)
+    fun dynamic_entity_graph() {
+        // GIVEN
+        val randomMember = members.shuffled().first()
+        val randomItems = items.shuffled().take(2)
+        val delivery = makeDelivery()
+        val order = makeOrder(randomMember, randomItems).also {
+            it.assignDelivery(delivery)
+        }
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val entityGraph = em.createEntityGraph(Ch14Order::class.java)
+        entityGraph.addAttributeNodes("delivery")
+        val hints: MutableMap<String, Any> = mutableMapOf(
+            "javax.persistence.fetchgraph" to entityGraph
+        )
+        val result = em.find(Ch14Order::class.java, order.id!!, hints)
+
+        /**
+         *     select
+         *         co1_0.id,
+         *         d1_0.id,
+         *         d1_0.status,
+         *         co1_0.member_id
+         *     from
+         *         ch14order co1_0
+         *     left join
+         *         ch14delivery d1_0
+         *             on d1_0.id=co1_0.delivery_id
+         *     where
+         *         co1_0.id=?
+         * */
+
+        // THEN
+        assertEquals(result.delivery!!.id, delivery.id!!)
+    }
+
+    @Test
+    @DisplayName("""
+        동적 EntityGraph + SubGraph
+    """)
+    fun dynamic_entity_graph_sub_graph() {
+        // GIVEN
+        val randomMember = members.shuffled().first()
+        val randomItems = items.shuffled().take(2)
+        val delivery = makeDelivery()
+        val order = makeOrder(randomMember, randomItems).also {
+            it.assignDelivery(delivery)
+        }
+        em.flush()
+        em.clear()
+
+        // WHEN
+        // 동적 EntityGraph
+        val entityGraph = em.createEntityGraph(Ch14Order::class.java)
+        entityGraph.addAttributeNodes("delivery")
+
+        // 동적 SubGraph
+        val orderItems = entityGraph.addSubgraph<Ch14OrderItem>("orderItems")
+        orderItems.addAttributeNodes("item")
+
+        val hints: MutableMap<String, Any> = mutableMapOf(
+            "javax.persistence.fetchgraph" to entityGraph
+        )
+        val result = em.find(Ch14Order::class.java, order.id!!, hints)
+        /**
+         *
+         *     select
+         *         co1_0.id,
+         *         co1_0.member_id,
+         *         d1_0.id,
+         *         d1_0.status,
+         *         oi1_0.order_id,
+         *         oi1_0.id,
+         *         oi1_0.count,
+         *         oi1_0.item_id,
+         *         oi1_0.price
+         *         i1_0.id,
+         *         i1_0.name,
+         *         i1_0.price,
+         *         i1_0.stock_quantity,
+         *     from
+         *         ch14order co1_0
+         *     left join
+         *         ch14delivery d1_0
+         *             on d1_0.id=co1_0.delivery_id
+         *     left join
+         *         ch14order_item oi1_0
+         *             on co1_0.id=oi1_0.order_id
+         *     left join
+         *         ch14item i1_0
+         *             on i1_0.id=oi1_0.item_id
+         *     where
+         *         co1_0.id=?
+         *
+         * */
+
+        // THEN
+        assertEquals(result.delivery!!.id, delivery.id!!)
         assertEquals(
             randomItems.map { it.id!! }.toSet(),
             result.orderItems.map{ it.item!!.id!! }.toSet()

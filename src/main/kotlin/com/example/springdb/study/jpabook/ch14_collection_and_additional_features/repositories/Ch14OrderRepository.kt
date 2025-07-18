@@ -24,4 +24,10 @@ interface Ch14OrderRepository : JpaRepository<Ch14Order, Long> {
     @EntityGraph(value = "Ch14Order.withAll", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT o FROM Ch14Order o WHERE o.id = :id")
     fun searchByIdWithAll(@Param("id") id: Long) : Ch14Order
+
+    /**
+     * 여기서는 위에서 보여지둣, 이미 만들어진 EntityGraph를 사용하기 때문에, 동적으로 EntityGraph를 만들어서 사용할 수 없다.
+     * 정 원한다면 Ch14OrderExtension(interface) + Ch14OrderExtensionImpl(구현체)를 만들고,
+     * 해당 fragment 에서 엔티티 메니저를 사용해서 동적으로 EntityGraph를 만들어서 사용 할 수는 있을것 같다.
+     * */
 }

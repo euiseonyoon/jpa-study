@@ -12,6 +12,7 @@ import jakarta.persistence.NamedEntityGraph
 import jakarta.persistence.NamedEntityGraphs
 import jakarta.persistence.NamedSubgraph
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 
 @NamedEntityGraphs(
     value = [
@@ -52,6 +53,16 @@ class Ch14Order {
 
     @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL], orphanRemoval = true)
     var orderItems: MutableSet<Ch14OrderItem> = mutableSetOf()
+
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    var delivery: Ch14Delivery? = null
+
+    fun assignDelivery(delivery: Ch14Delivery) {
+        this.delivery = delivery
+        if (delivery.order != this) {
+            delivery.order = this
+        }
+    }
 
     fun assignMember(member: Ch14Member) {
         this.member = member
