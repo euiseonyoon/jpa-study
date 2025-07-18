@@ -1,5 +1,6 @@
 package com.example.springdb.study.jpabook.ch14_collection_and_additional_features.additional_features
 
+import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.enums.Ch14PlayerVarsity
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Player
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.models.Ch14Team
 import com.example.springdb.study.jpabook.ch14_collection_and_additional_features.repositories.Ch14PlayerRepository
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import kotlin.test.assertEquals
 
 @DataJpaTest
 class Ch14AdditionalFeaturesTest {
@@ -112,6 +114,29 @@ class Ch14AdditionalFeaturesTest {
 
         salaryKeyPlayersValuesMap.values.map { playerList ->
             checkOrdering(playerList.map { it.id!!.toInt() }, OrderingFlow.ASC)
+        }
+    }
+
+    @Test
+    fun test_converter() {
+        // WHEN
+        val varsityPlayers = players.shuffled().take(2)
+        varsityPlayers.map {
+            it.varsityStatus = true
+            playerRepository.save(it)
+        }
+        val varsityPlayerIds = varsityPlayers.map { it.id!! }.toSet()
+        em.flush()
+        em.clear()
+
+        // THEN
+        val result = playerRepository.searchAllPlayers()
+        result.forEach { player ->
+            if (player.id in varsityPlayerIds) {
+                assertEquals(Ch14PlayerVarsity.VARSITY.name, player.varsityStatus)
+            } else {
+                assertEquals(Ch14PlayerVarsity.JUNIOR_VARSITY.name, player.varsityStatus)
+            }
         }
     }
 
