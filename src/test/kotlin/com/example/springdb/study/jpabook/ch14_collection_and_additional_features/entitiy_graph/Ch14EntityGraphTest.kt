@@ -171,4 +171,37 @@ class Ch14EntityGraphTest {
         assertEquals(randomMember.id!!, (result as Ch14Order).member!!.id)
     }
 
+    @Test
+    @DisplayName("""
+        Spring Data Jpa (JpaRepository)를 통해 엔티티 그래프를 사용하는 예제
+    """)
+    fun entity_graph_spring_data_jpa() {
+        // GIVEN
+        val randomMember = members.shuffled().first()
+        val randomItems = items.shuffled().take(2)
+        val order = makeOrder(randomMember, randomItems)
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val result = orderRepository.searchByIdWithMember(order.id!!)
+        /**
+         *        select
+         *             co1_0.id,
+         *             co1_0.member_id,
+         *             m1_0.id,
+         *             m1_0.name
+         *         from
+         *             ch14order co1_0
+         *         join
+         *             ch14member m1_0
+         *                 on m1_0.id=co1_0.member_id
+         *         where
+         *             co1_0.id=?
+         * */
+
+        // THEN
+        assertEquals(randomMember.id!!, result.member!!.id)
+    }
+
 }
