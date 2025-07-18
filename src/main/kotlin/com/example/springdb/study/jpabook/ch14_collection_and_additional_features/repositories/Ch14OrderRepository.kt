@@ -20,4 +20,8 @@ interface Ch14OrderRepository : JpaRepository<Ch14Order, Long> {
     @EntityGraph(value = "Ch14Order.withMember", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT o FROM Ch14Order o WHERE o.id = :id")
     fun searchByIdWithMember(@Param("id") id: Long) : Ch14Order
+
+    @EntityGraph(value = "Ch14Order.withAll", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("SELECT o FROM Ch14Order o WHERE o.id = :id")
+    fun searchByIdWithAll(@Param("id") id: Long) : Ch14Order
 }

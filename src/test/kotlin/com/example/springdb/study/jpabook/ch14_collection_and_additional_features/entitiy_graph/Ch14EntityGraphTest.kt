@@ -204,4 +204,131 @@ class Ch14EntityGraphTest {
         assertEquals(randomMember.id!!, result.member!!.id)
     }
 
+
+    @Test
+    @DisplayName("""
+        JPA(Hibernate)를 직접 사용하여, EntityGraph + SubGraph를 사용하는 예시
+        
+        Ch14Order - Ch14OrderItem 까지는 Ch14Order 테이블이 관리한다
+        하지만 
+        Ch14OrderItem - Ch14Item 은 Ch14Order 테이블이 관리하지 않는다.
+        
+        따라서, Ch14Order 조회로 Ch14Order - Ch14OrderItem - Ch14Item 까지의 데이터를 한번에 가져오려면
+        EntityGraph(Ch14Order-Ch14OrderItem) + SubGraph(Ch14OrderItem-Ch14Item)을 같이 사용해야 한다.
+    """)
+    fun entity_graph_and_sub_graph_jpa_hibernate() {
+        // GIVEN
+        val randomMember = members.shuffled().first()
+        val randomItems = items.shuffled().take(2)
+        val order = makeOrder(randomMember, randomItems)
+
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val entityGraph = em.getEntityGraph("Ch14Order.withAll")
+        val hints: MutableMap<String, Any> = mutableMapOf(
+            "javax.persistence.fetchgraph" to entityGraph
+        )
+        val result = em.find(Ch14Order::class.java, order.id!!, hints)
+
+//        em.createQuery() 사용 예시
+//        val result = em.createQuery("SELECT o FROM Ch14Order o WHERE o.id = :id")
+//            .setParameter("id", order.id)
+//            .setHint(
+//                "javax.persistence.fetchgraph",
+//                em.getEntityGraph("Ch14Order.withAll"),
+//            ).singleResult
+
+        /**
+         *     select
+         *         co1_0.id,
+         *         co1_0.member_id,
+         *         m1_0.id,
+         *         m1_0.name,
+         *         oi1_0.order_id,
+         *         oi1_0.id,
+         *         oi1_0.count,
+         *         oi1_0.item_id,
+         *         oi1_0.price
+         *         i1_0.id,
+         *         i1_0.name,
+         *         i1_0.price,
+         *         i1_0.stock_quantity,
+         *     from
+         *         ch14order co1_0
+         *     join
+         *         ch14member m1_0
+         *             on m1_0.id=co1_0.member_id
+         *     left join
+         *         ch14order_item oi1_0
+         *             on co1_0.id=oi1_0.order_id
+         *     left join
+         *         ch14item i1_0
+         *             on i1_0.id=oi1_0.item_id
+         *     where
+         *         co1_0.id=?
+         *
+         * */
+
+        // THEN
+        assertEquals(result.member!!.id, randomMember.id!!)
+        assertEquals(
+            randomItems.map { it.id!! }.toSet(),
+            result.orderItems.map{ it.item!!.id!! }.toSet()
+        )
+    }
+
+    @Test
+    @DisplayName("""
+        Spring Data Jpa (JpaRepository)를 사용하여, EntityGraph + SubGraph를 사용하는 예시
+    """)
+    fun entity_graph_and_sub_graph_spring_data_jpa() {
+        // GIVEN
+        val randomMember = members.shuffled().first()
+        val randomItems = items.shuffled().take(2)
+        val order = makeOrder(randomMember, randomItems)
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val result = orderRepository.searchByIdWithAll(order.id!!)
+        /**
+         *     select
+         *         co1_0.id,
+         *         co1_0.member_id,
+         *         m1_0.id,
+         *         m1_0.name,
+         *         oi1_0.order_id,
+         *         oi1_0.id,
+         *         oi1_0.count,
+         *         oi1_0.item_id,
+         *         i1_0.id,
+         *         i1_0.name,
+         *         i1_0.price,
+         *         i1_0.stock_quantity,
+         *         oi1_0.price
+         *     from
+         *         ch14order co1_0
+         *     join
+         *         ch14member m1_0
+         *             on m1_0.id=co1_0.member_id
+         *     left join
+         *         ch14order_item oi1_0
+         *             on co1_0.id=oi1_0.order_id
+         *     left join
+         *         ch14item i1_0
+         *             on i1_0.id=oi1_0.item_id
+         *     where
+         *         co1_0.id=?
+         * */
+
+        // THEN
+        assertEquals(result.member!!.id, randomMember.id!!)
+        assertEquals(
+            randomItems.map { it.id!! }.toSet(),
+            result.orderItems.map{ it.item!!.id!! }.toSet()
+        )
+    }
+
 }

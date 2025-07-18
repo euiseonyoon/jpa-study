@@ -9,12 +9,35 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.NamedAttributeNode
 import jakarta.persistence.NamedEntityGraph
+import jakarta.persistence.NamedEntityGraphs
+import jakarta.persistence.NamedSubgraph
 import jakarta.persistence.OneToMany
 
-@NamedEntityGraph(
-    name = "Ch14Order.withMember",
-    attributeNodes = [
-        NamedAttributeNode("member")
+@NamedEntityGraphs(
+    value = [
+        NamedEntityGraph(
+            name = "Ch14Order.withMember",
+            attributeNodes = [
+                NamedAttributeNode("member")
+            ]
+        ),
+
+        NamedEntityGraph(
+            name = "Ch14Order.withAll",
+            attributeNodes = [
+                NamedAttributeNode("member"),
+                NamedAttributeNode("orderItems", subgraph = "orderItemsSubGraph")
+            ],
+            subgraphs = [
+                NamedSubgraph(
+                    name = "orderItemsSubGraph",
+                    attributeNodes = [
+                        // Ch14OrderItem.item의 필드명과 일치하게
+                        NamedAttributeNode("item")
+                    ]
+                )
+            ]
+        )
     ]
 )
 @Entity
