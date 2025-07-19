@@ -8,6 +8,8 @@ import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch
 import com.example.springdb.study.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import org.hibernate.Hibernate
+import org.hibernate.proxy.HibernateProxy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -196,5 +198,52 @@ class Ch15ProxyTest {
         assertTrue { item is Ch15Item }
         assertFalse { item.javaClass == Ch15Book::class.java }
         assertThrows<ClassCastException> { item as Ch15Book }
+    }
+
+    @Test
+    @DisplayName("Hibernate가 제공하는 기능을 사용하여 proxy로 부터 target(엔티티) 가져와서 상속관계 프록시 문제 해결")
+    fun solution_unproxy() {
+        // GIVEN
+        val book = Ch15Book()
+        book.name = "Some Book1"
+        book.isbn = "12345.abcde"
+        book.author = "John"
+        book.price = 100
+        book.stockQuantity = 20
+        em.persist(book)
+        em.flush()
+
+        val order = Ch15Order()
+        order.assignItem(book, 5)
+        em.persist(order)
+        em.flush()
+
+        em.clear()
+
+        // WHEN
+        val orderItem = em.find(Ch15OrderItem::class.java, order.orderItems.first().id!!)
+        val itemProxy = orderItem.item!!
+
+        // item_javaClass=class com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Item$HibernateProxy
+        log.info("itemProxy_javaClass={}", itemProxy.javaClass)
+
+        // THEN
+        // Hibernate 5.x 이하
+        val target = (itemProxy as HibernateProxy).hibernateLazyInitializer.implementation
+        assertTrue { target != itemProxy }
+        assertTrue { target is Ch15Book }
+        log.info("Using implementation: book_author={}", (target as Ch15Book).author)
+
+        // Hibernate 6.X 이상
+        val target2 = Hibernate.unproxy(itemProxy)
+        assertTrue { target2 != itemProxy }
+        assertTrue { target2 is Ch15Book }
+        log.info("Using unproxy: book_author={}", (target2 as Ch15Book).author)
+
+        /**
+         * LOG:
+         *      c.e.s.s.j.c.proxy.Ch15ProxyTest          : Using implementation: book_author=John
+         *      c.e.s.s.j.c.proxy.Ch15ProxyTest          : Using unproxy: book_author=John
+         * */
     }
 }
