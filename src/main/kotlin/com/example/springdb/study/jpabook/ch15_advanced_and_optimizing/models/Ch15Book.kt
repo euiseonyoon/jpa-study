@@ -8,4 +8,8 @@ import jakarta.persistence.Entity
 class Ch15Book : Ch15Item() {
     var author: String? = null
     var isbn: String? = null
+
+    override fun getTitle(): String = "book: author={$author}, isbn={$isbn}"
+
+    override fun getTarget(): Any = this
 }

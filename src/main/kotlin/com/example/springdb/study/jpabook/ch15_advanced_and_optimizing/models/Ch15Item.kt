@@ -1,5 +1,6 @@
 package com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models
 
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.interfaces.Ch15ItemProxyInterface
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
@@ -14,7 +15,7 @@ import jakarta.persistence.OneToMany
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "DTYPE")
-abstract class Ch15Item {
+abstract class Ch15Item : Ch15ItemProxyInterface {
     @Id
     @GeneratedValue
     val id: Long? = null

@@ -12,4 +12,8 @@ class Ch15Album : Ch15Item() {
 
     @Enumerated(EnumType.STRING)
     var genre: Ch15AlbumGenre? = null
+
+    override fun getTitle(): String = "album: artist={$artist}, genre={$genre}"
+
+    override fun getTarget(): Any = this
 }

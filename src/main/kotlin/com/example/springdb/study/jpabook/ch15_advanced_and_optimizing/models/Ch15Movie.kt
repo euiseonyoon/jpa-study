@@ -8,4 +8,8 @@ import jakarta.persistence.Entity
 class Ch15Movie : Ch15Item() {
     var director: String? = null
     var actor: String? = null
+
+    override fun getTitle(): String = "movie: director={$director}, actor={$actor}"
+
+    override fun getTarget(): Any = this
 }
