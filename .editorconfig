@@ -16,6 +16,7 @@ ktlint_standard_no-wildcard-imports = enabled
 ktlint_standard_import-ordering = enabled
 ktlint_standard_package-name = disabled
 ktlint_package-name = disabled
+ktlint_standard_chain-wrapping  = disabled
 
 [*.{gradle,kts}]
 indent_size = 4
