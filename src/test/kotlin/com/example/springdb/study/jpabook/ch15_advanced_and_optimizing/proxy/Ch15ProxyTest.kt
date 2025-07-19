@@ -4,10 +4,10 @@ import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch
 import com.example.springdb.study.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -107,5 +107,26 @@ class Ch15ProxyTest {
         assertTrue { refMember is Ch15Member }
     }
 
+    @Test
+    @DisplayName("엔티티의 equals()를 구현하여 비교 테스트를 해봅니다.")
+    fun entity_proxy_equality_comparison() {
+        // GIVEN
+        val member = Ch15Member("Member1")
+        em.persist(member)
+        em.flush()
+        em.clear()
 
+        val memberNotPersisted = Ch15Member("Member1")
+        val refMember = em.getReference(Ch15Member::class.java, member.id!!)
+
+        // THEN
+        // id가 없거나 다르면 false
+        assertFalse { refMember.equals(memberNotPersisted) }
+        // 프록시의 target(엔티티)가 초기화 되지 않았기 때문에 false
+        assertFalse { memberNotPersisted.equals(refMember) }
+
+        // 프록시의 target(엔티티) 초기화
+        val findMember = em.find(Ch15Member::class.java, member.id!!)
+        assertTrue { findMember.equals(refMember) }
+    }
 }
