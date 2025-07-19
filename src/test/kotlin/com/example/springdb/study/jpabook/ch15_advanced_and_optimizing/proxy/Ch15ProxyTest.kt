@@ -1,11 +1,16 @@
 package com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.proxy
 
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Book
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Item
 import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Member
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Order
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15OrderItem
 import com.example.springdb.study.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import kotlin.test.assertFalse
@@ -128,5 +133,68 @@ class Ch15ProxyTest {
         // 프록시의 target(엔티티) 초기화
         val findMember = em.find(Ch15Member::class.java, member.id!!)
         assertTrue { findMember.equals(refMember) }
+    }
+
+    @Test
+    @DisplayName("부모타입으로 프록시 조회")
+    fun proxy_search_by_parent_type() {
+        // GIVEN
+        val book = Ch15Book()
+        book.name = "Some Book1"
+        book.isbn = "12345.abcde"
+        book.author = "John"
+        book.price = 100
+        book.stockQuantity = 20
+
+        em.persist(book)
+        em.flush()
+        em.clear()
+
+        // WHEN
+        val itemProxy = em.getReference(Ch15Item::class.java, book.id!!)
+
+        // THEN
+        assertFalse { itemProxy is Ch15Book }
+        assertTrue { itemProxy is Ch15Item }
+        assertFalse { itemProxy.javaClass == Ch15Book::class.java }
+        assertThrows<ClassCastException> { itemProxy as Ch15Book }
+
+        /**
+         * 여기서 문제는 itemProxy는 Ch15Item 타입을 타겟으로 하는 프록시이다.
+         * 그래서 Ch15Book 으로 다운케스팅 하려고 한다면 문제가 발생한다.
+         * */
+    }
+
+    @Test
+    @DisplayName("상속관계와 프록시 도메인 모델")
+    fun inheritance_and_proxy() {
+        // GIVEN
+        val book = Ch15Book()
+        book.name = "Some Book1"
+        book.isbn = "12345.abcde"
+        book.author = "John"
+        book.price = 100
+        book.stockQuantity = 20
+        em.persist(book)
+        em.flush()
+
+        val order = Ch15Order()
+        order.assignItem(book, 5)
+        em.persist(order)
+        em.flush()
+
+        em.clear()
+
+        // WHEN
+        val orderItem = em.find(Ch15OrderItem::class.java, order.orderItems.first().id!!)
+        val item = orderItem.item!!
+
+        // item_javaClass=class com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Item$HibernateProxy
+        log.info("item_javaClass={}", item.javaClass)
+
+        assertFalse { item is Ch15Book }
+        assertTrue { item is Ch15Item }
+        assertFalse { item.javaClass == Ch15Book::class.java }
+        assertThrows<ClassCastException> { item as Ch15Book }
     }
 }
