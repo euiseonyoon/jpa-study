@@ -48,4 +48,11 @@ class Ch15Order {
             item.orderItems.add(orderItem)
         }
     }
+
+    fun assignMember(member: Ch15Member) {
+        this.member = member
+        if (!member.orders.contains(this)) {
+            member.orders.add(this)
+        }
+    }
 }
