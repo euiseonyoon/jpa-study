@@ -4,6 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import org.hibernate.Hibernate
 import org.hibernate.proxy.HibernateProxy
 
@@ -16,14 +17,15 @@ class Ch15Member {
     @Column(nullable = false)
     var name: String? = null
 
+    @OneToMany(mappedBy = "member")
+    var orders: MutableSet<Ch15Order> = mutableSetOf()
+
     constructor()
     constructor(name: String) {
         this.name = name
     }
 
-    override fun hashCode(): Int {
-        return name?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = name?.hashCode() ?: 0
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -53,11 +55,10 @@ class Ch15Member {
         return compareMember(target)
     }
 
-    private fun compareMember(other: Ch15Member): Boolean {
-        return if (other.id == null) {
+    private fun compareMember(other: Ch15Member): Boolean =
+        if (other.id == null) {
             false
         } else {
             this.id == other.id
         }
-    }
 }
