@@ -5,6 +5,7 @@ import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch
 import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Member
 import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Order
 import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15OrderItem
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.visitors.Ch15TitleVisitor
 import com.example.springdb.study.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -283,5 +284,41 @@ class Ch15ProxyTest {
 
         val target = itemProxy.getTarget()
         assertTrue { target is Ch15Book }
+    }
+
+    @Test
+    @DisplayName("Visitor 패턴으로 해결")
+    fun solution_visitor() {
+        // GIVEN
+        val book = Ch15Book()
+        book.name = "Some Book1"
+        book.isbn = "12345.abcde"
+        book.author = "John"
+        book.price = 100
+        book.stockQuantity = 20
+        em.persist(book)
+        em.flush()
+
+        val order = Ch15Order()
+        order.assignItem(book, 5)
+        em.persist(order)
+        em.flush()
+
+        em.clear()
+
+        // WHEN
+        val orderItem = em.find(Ch15OrderItem::class.java, order.orderItems.first().id!!)
+        val itemProxy = orderItem.item!!
+
+        itemProxy.acceptVisitor(Ch15TitleVisitor())
+
+        // item_javaClass=class com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models.Ch15Item$HibernateProxy
+        log.info("itemProxy_javaClass={}", itemProxy.javaClass)
+
+        // THEN
+        /**
+         * LOG:
+         *      book: author=John, isbn=12345.abcde
+         * */
     }
 }

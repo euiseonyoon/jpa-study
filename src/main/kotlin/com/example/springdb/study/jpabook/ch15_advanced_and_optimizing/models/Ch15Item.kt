@@ -1,6 +1,7 @@
 package com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.models
 
 import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.interfaces.Ch15ItemProxyInterface
+import com.example.springdb.study.jpabook.ch15_advanced_and_optimizing.interfaces.Ch15Visitor
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
@@ -31,4 +32,6 @@ abstract class Ch15Item : Ch15ItemProxyInterface {
 
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     var orderItems: MutableSet<Ch15OrderItem> = mutableSetOf()
+
+    abstract fun acceptVisitor(visitor: Ch15Visitor)
 }
