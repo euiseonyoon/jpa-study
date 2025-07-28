@@ -128,10 +128,9 @@ class Ch15ProxyTest {
         val refMember = em.getReference(Ch15Member::class.java, member.id!!)
 
         // THEN
-        // id가 없거나 다르면 false
-        assertFalse { refMember.equals(memberNotPersisted) }
-        // 프록시의 target(엔티티)가 초기화 되지 않았기 때문에 false
+        // memberNotPersisted.id == null 이어서 같지 않음
         assertFalse { memberNotPersisted.equals(refMember) }
+        assertFalse { refMember.equals(memberNotPersisted) }
 
         // 프록시의 target(엔티티) 초기화
         val findMember = em.find(Ch15Member::class.java, member.id!!)
